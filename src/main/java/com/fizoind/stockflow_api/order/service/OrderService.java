@@ -4,6 +4,7 @@ import com.fizoind.stockflow_api.authentication.CustomUserDetails;
 import com.fizoind.stockflow_api.customer.entity.Customer;
 import com.fizoind.stockflow_api.customer.exception.CustomerNotFoundException;
 import com.fizoind.stockflow_api.customer.repository.CustomerRepository;
+import com.fizoind.stockflow_api.email.EmailService;
 import com.fizoind.stockflow_api.order.dto.OrderCreateDTO;
 import com.fizoind.stockflow_api.order.dto.OrderResponseDTO;
 import com.fizoind.stockflow_api.order.entity.CustomerOrder;
@@ -49,28 +50,31 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final StockMovementRepository stockMovementRepository;
     private final StockMovementService stockMovementService;
+    private final EmailService emailService;
 
-    public OrderService(CustomerRepository customerRepository, CustomerOrderRepository customerOrderRepository, OrderItemRepository orderItemRepository, ProductRepository productRepository, StockMovementRepository stockMovementRepository, StockMovementService stockMovementService) {
+    public OrderService(CustomerRepository customerRepository, CustomerOrderRepository customerOrderRepository, OrderItemRepository orderItemRepository, ProductRepository productRepository, StockMovementRepository stockMovementRepository, StockMovementService stockMovementService, EmailService emailService) {
         this.customerRepository = customerRepository;
         this.customerOrderRepository = customerOrderRepository;
         this.orderItemRepository = orderItemRepository;
         this.productRepository = productRepository;
         this.stockMovementRepository = stockMovementRepository;
         this.stockMovementService = stockMovementService;
+        this.emailService = emailService;
     }
 
     @Transactional
     public void createCustomerOrder(OrderCreateDTO dto) {
 
-        Long customerId = ((CustomUserDetails) SecurityContextHolder.getContext()
+        String customerName = ((CustomUserDetails) SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getPrincipal())
-                .getUser().getId();
+                .getUser().getUsername();
 
         log.info("Starting to create order..............");
-        Customer customer = customerRepository.findById(customerId).orElseThrow(() -> new CustomerNotFoundException(customerId));
 
-        log.debug("Customer with id {} exists..........", customerId);
+        Customer customer = customerRepository.findByName(customerName).orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        log.debug("Customer with name {} exists..........", customerName);
 
         CustomerOrder customerOrder = new CustomerOrder();
         customerOrder.setCustomer(customer);
@@ -122,6 +126,8 @@ public class OrderService {
 
         // save again (updates + cascades OrderItems)
         customerOrderRepository.save(customerOrder);
+
+        emailService.sendOrderConfirmation(customer.getEmail(), customer.getName(), customerOrder.getId());
     }
 
     public OrderResponseDTO getCustomerOrder(Long orderId) {

@@ -39,6 +39,7 @@ build/
 
 # ======= Logs ========
 *.log
+*.logs
 
 # ===== OS Files =======
 .DS_store
