@@ -21,6 +21,7 @@ import com.fizoind.stockflow_api.product.entity.ProductStatus;
 import com.fizoind.stockflow_api.product.exception.InactiveProductException;
 import com.fizoind.stockflow_api.product.exception.ProductNotFoundException;
 import com.fizoind.stockflow_api.product.repository.ProductRepository;
+import com.fizoind.stockflow_api.receipt.ReceiptPdfService;
 import com.fizoind.stockflow_api.stockmovement.entity.MovementType;
 import com.fizoind.stockflow_api.stockmovement.entity.StockMovement;
 import com.fizoind.stockflow_api.stockmovement.exception.InsufficientStockException;
@@ -51,8 +52,9 @@ public class OrderService {
     private final StockMovementRepository stockMovementRepository;
     private final StockMovementService stockMovementService;
     private final EmailService emailService;
+    private final ReceiptPdfService receiptPdfService;
 
-    public OrderService(CustomerRepository customerRepository, CustomerOrderRepository customerOrderRepository, OrderItemRepository orderItemRepository, ProductRepository productRepository, StockMovementRepository stockMovementRepository, StockMovementService stockMovementService, EmailService emailService) {
+    public OrderService(CustomerRepository customerRepository, CustomerOrderRepository customerOrderRepository, OrderItemRepository orderItemRepository, ProductRepository productRepository, StockMovementRepository stockMovementRepository, StockMovementService stockMovementService, EmailService emailService, ReceiptPdfService receiptPdfService) {
         this.customerRepository = customerRepository;
         this.customerOrderRepository = customerOrderRepository;
         this.orderItemRepository = orderItemRepository;
@@ -60,6 +62,7 @@ public class OrderService {
         this.stockMovementRepository = stockMovementRepository;
         this.stockMovementService = stockMovementService;
         this.emailService = emailService;
+        this.receiptPdfService = receiptPdfService;
     }
 
     @Transactional
@@ -127,7 +130,10 @@ public class OrderService {
         // save again (updates + cascades OrderItems)
         customerOrderRepository.save(customerOrder);
 
-        emailService.sendOrderConfirmation(customer.getEmail(), customer.getName(), customerOrder.getId());
+
+
+//        emailService.sendOrderConfirmation(customer.getEmail(), customer.getName(), customerOrder.getId());
+        emailService.sendInvoice(customer.getEmail(), receiptPdfService.generateReceipt(customerOrder));
     }
 
     public OrderResponseDTO getCustomerOrder(Long orderId) {

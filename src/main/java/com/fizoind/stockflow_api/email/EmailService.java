@@ -1,7 +1,11 @@
 package com.fizoind.stockflow_api.email;
 
+import jakarta.mail.internet.MimeMessage;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -28,5 +32,31 @@ public class EmailService {
         );
 
         mailSender.send(mailMessage);
+    }
+
+    @Async("emailExecutor")
+    public void sendInvoice(String to, byte[] pdfBytes) {
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+
+            MimeMessageHelper helper =
+                    new MimeMessageHelper(message, true);
+
+            helper.setFrom("f4194257@gmail.com", "Stockflow");
+            helper.setTo(to);
+            helper.setSubject("Stockflow Invoice");
+
+            helper.setText("Your invoice is attached.");
+
+            helper.addAttachment(
+                    "invoice.pdf",
+                    new ByteArrayResource(pdfBytes), "application/pdf"
+            );
+
+            mailSender.send(message);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
