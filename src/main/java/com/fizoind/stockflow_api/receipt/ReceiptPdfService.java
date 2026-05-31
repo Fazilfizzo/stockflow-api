@@ -7,16 +7,19 @@ import org.openpdf.text.Font;
 import org.openpdf.text.pdf.PdfPCell;
 import org.openpdf.text.pdf.PdfPTable;
 import org.openpdf.text.pdf.PdfWriter;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class ReceiptPdfService {
 
-        public byte[] generateReceipt(CustomerOrder order) {
+        @Async("invoiceExecutor")
+        public CompletableFuture<byte[]> generateReceipt(CustomerOrder order) {
 
             try {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -44,7 +47,7 @@ public class ReceiptPdfService {
 
                 // ================= ORDER INFO TABLE =================
                 PdfPTable infoTable = new PdfPTable(2);
-                infoTable.setWidthPercentage(100);
+                infoTable.setWidthPercentage(90);
 
                 infoTable.addCell("Invoice ID");
                 infoTable.addCell(String.valueOf(order.getId()));
@@ -61,10 +64,10 @@ public class ReceiptPdfService {
 
                 // ================= ITEM TABLE =================
                 PdfPTable table = new PdfPTable(4);
-                table.setWidthPercentage(100);
+                table.setWidthPercentage(90);
 
                 // Header row styling
-                String[] headers = {"Product", "Qty", "Price", "Total"};
+                String[] headers = {"Product", "Quantity", "Price", "Total"};
 
                 for (String h : headers) {
                     PdfPCell cell = new PdfPCell(new Phrase(h));
@@ -116,7 +119,7 @@ public class ReceiptPdfService {
 
                 document.close();
 
-                return out.toByteArray();
+                return CompletableFuture.completedFuture(out.toByteArray());
 
             } catch (Exception e) {
                 throw new RuntimeException("Failed to generate receipt PDF", e);

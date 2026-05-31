@@ -44,7 +44,7 @@ public class ProductService {
 
 
     public List<ProductResponseDTO> getAllProducts() {
-        return productRepository.findAll()
+        return productRepository.getAllProducts()
                 .stream()
                 .map(ProductMapper::toproductResponseDTO)
                 .toList();

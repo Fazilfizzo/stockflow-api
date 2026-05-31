@@ -28,7 +28,7 @@ public class Product extends Auditable {
     private BigDecimal price;
 
     @Column(nullable = false)
-    private Integer stockQuantity = 0;
+    private int stockQuantity = 0;
 
     private String description;
 
@@ -50,7 +50,7 @@ public class Product extends Auditable {
     public Product() {
     }
 
-    public Product(Long id, String name, String sku, BigDecimal price, Integer stockQuantity, String description, ProductStatus status, Supplier supplier, Category category, List<StockMovement> stockMovements) {
+    public Product(Long id, String name, String sku, BigDecimal price, int stockQuantity, String description, ProductStatus status, Supplier supplier, Category category, List<StockMovement> stockMovements) {
         this.id = id;
         this.name = name;
         this.sku = sku;
@@ -95,11 +95,11 @@ public class Product extends Auditable {
         this.price = price;
     }
 
-    public Integer getStockQuantity() {
+    public int getStockQuantity() {
         return stockQuantity;
     }
 
-    public void setStockQuantity(Integer stockQuantity) {
+    public void setStockQuantity(int stockQuantity) {
         this.stockQuantity = stockQuantity;
     }
 

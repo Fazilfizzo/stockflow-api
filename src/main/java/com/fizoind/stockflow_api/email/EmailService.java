@@ -1,6 +1,7 @@
 package com.fizoind.stockflow_api.email;
 
 import jakarta.mail.internet.MimeMessage;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
@@ -11,6 +12,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
+
+    @Value("${default.from}")
+    String from;
 
     private final JavaMailSender mailSender;
 
@@ -43,7 +47,7 @@ public class EmailService {
             MimeMessageHelper helper =
                     new MimeMessageHelper(message, true);
 
-            helper.setFrom("f4194257@gmail.com", "Stockflow");
+            helper.setFrom(from, "Stockflow");
             helper.setTo(to);
             helper.setSubject("Stockflow Invoice");
 

@@ -39,6 +39,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class OrderService {
@@ -65,7 +66,7 @@ public class OrderService {
         this.receiptPdfService = receiptPdfService;
     }
 
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public void createCustomerOrder(OrderCreateDTO dto) {
 
         String customerName = ((CustomUserDetails) SecurityContextHolder.getContext()
@@ -130,10 +131,13 @@ public class OrderService {
         // save again (updates + cascades OrderItems)
         customerOrderRepository.save(customerOrder);
 
-
+//        receiptPdfService.generateReceipt(customerOrder)
+//                .thenAccept(pdfBytes -> {
+//                    emailService.sendInvoice(customer.getEmail(), pdfBytes);
+//                });
 
 //        emailService.sendOrderConfirmation(customer.getEmail(), customer.getName(), customerOrder.getId());
-        emailService.sendInvoice(customer.getEmail(), receiptPdfService.generateReceipt(customerOrder));
+//        emailService.sendInvoice(customer.getEmail(), pdfBytes);
     }
 
     public OrderResponseDTO getCustomerOrder(Long orderId) {
@@ -144,7 +148,7 @@ public class OrderService {
                 .getUser().getId();
 
 
-        CustomerOrder customerOrder = customerOrderRepository.findByIdAndCustomerId(orderId, customerId).orElseThrow(() -> new RuntimeException("Order Not Found"));
+        CustomerOrder customerOrder = customerOrderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order Not Found"));
         if (!customerOrder.getCustomer().getId().equals(customerId)) {
             throw new RuntimeException("Unauthorized!!!!!!!!!!!!!!!!!!!!!");
         }
@@ -171,7 +175,7 @@ public class OrderService {
     }
 
     public List<OrderResponseDTO> getAllOrders() {
-        return customerOrderRepository.findAll()
+        return customerOrderRepository.getAllOrders()
                 .stream()
                 .map(OrderMapper::toOrderResponseDto)
                 .toList();
