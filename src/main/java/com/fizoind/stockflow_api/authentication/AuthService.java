@@ -3,6 +3,7 @@ package com.fizoind.stockflow_api.authentication;
 import com.fizoind.stockflow_api.authentication.dto.AuthResponse;
 import com.fizoind.stockflow_api.authentication.dto.LoginRequest;
 import com.fizoind.stockflow_api.authentication.dto.RegisterRequest;
+import com.fizoind.stockflow_api.authentication.refreshToken.RefreshTokenService;
 import com.fizoind.stockflow_api.customer.entity.Customer;
 import com.fizoind.stockflow_api.customer.repository.CustomerRepository;
 import com.fizoind.stockflow_api.user.Role;
@@ -24,13 +25,15 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
-    public AuthService(UserRepository userRepository, CustomerRepository customerRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtService jwtService) {
+    public AuthService(UserRepository userRepository, CustomerRepository customerRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtService jwtService, RefreshTokenService refreshTokenService) {
         this.userRepository = userRepository;
         this.customerRepository = customerRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     public void register(RegisterRequest registerRequest) {
@@ -60,8 +63,10 @@ public class AuthService {
 
         User user = userRepository.findByUsername(loginRequest.getUsername()).orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
-        String token = jwtService.generateToken(new CustomUserDetails(user));
+        String accessToken = jwtService.generateToken(new CustomUserDetails(user));
 
-        return new AuthResponse(token);
+        String refreshToken = refreshTokenService.createToken(user.getUsername());
+
+        return new AuthResponse(accessToken, refreshToken);
     }
 }
