@@ -97,8 +97,8 @@ public class StockMovementService {
         stockMovement.setReference("ORDER-" + orderId);
         stockMovement.setMovementDate(LocalDateTime.now());
         stockMovement.setProduct(product);
-        int updated_stock = productRepository.reduceStock(product.getId(), itemDTO.getQuantity());
-//        product.setStockQuantity(product.getStockQuantity() - itemDTO.getQuantity());
+//        int updated_stock = productRepository.reduceStock(product.getId(), itemDTO.getQuantity());
+        product.setStockQuantity(product.getStockQuantity() - itemDTO.getQuantity());
         product = productRepository.save(product);
         stockMovementRepository.save(stockMovement);
     }
