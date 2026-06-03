@@ -9,6 +9,7 @@ import com.fizoind.stockflow_api.order.dto.OrderCreateDTO;
 import com.fizoind.stockflow_api.order.dto.OrderResponseDTO;
 import com.fizoind.stockflow_api.order.entity.CustomerOrder;
 import com.fizoind.stockflow_api.order.entity.OrderStatus;
+import com.fizoind.stockflow_api.order.event.OrderCreatedEvent;
 import com.fizoind.stockflow_api.order.exception.OrderNotFoundException;
 import com.fizoind.stockflow_api.order.mapper.OrderMapper;
 import com.fizoind.stockflow_api.order.repository.CustomerOrderRepository;
@@ -32,6 +33,7 @@ import com.fizoind.stockflow_api.supplier.exception.InactiveSupplierException;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -54,8 +56,9 @@ public class OrderService {
     private final StockMovementService stockMovementService;
     private final EmailService emailService;
     private final ReceiptPdfService receiptPdfService;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public OrderService(CustomerRepository customerRepository, CustomerOrderRepository customerOrderRepository, OrderItemRepository orderItemRepository, ProductRepository productRepository, StockMovementRepository stockMovementRepository, StockMovementService stockMovementService, EmailService emailService, ReceiptPdfService receiptPdfService) {
+    public OrderService(CustomerRepository customerRepository, CustomerOrderRepository customerOrderRepository, OrderItemRepository orderItemRepository, ProductRepository productRepository, StockMovementRepository stockMovementRepository, StockMovementService stockMovementService, EmailService emailService, ReceiptPdfService receiptPdfService, ApplicationEventPublisher eventPublisher) {
         this.customerRepository = customerRepository;
         this.customerOrderRepository = customerOrderRepository;
         this.orderItemRepository = orderItemRepository;
@@ -64,6 +67,7 @@ public class OrderService {
         this.stockMovementService = stockMovementService;
         this.emailService = emailService;
         this.receiptPdfService = receiptPdfService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional(rollbackOn = Exception.class)
@@ -138,6 +142,7 @@ public class OrderService {
 
 //        emailService.sendOrderConfirmation(customer.getEmail(), customer.getName(), customerOrder.getId());
 //        emailService.sendInvoice(customer.getEmail(), pdfBytes);
+        eventPublisher.publishEvent(new OrderCreatedEvent(customerOrder));
     }
 
     public OrderResponseDTO getCustomerOrder(Long orderId) {
