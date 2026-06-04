@@ -29,52 +29,52 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ProductNotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handlePublicNotFoundException(HttpServletRequest request, ProductNotFoundException productNotFoundException) {
+    public ResponseEntity<ApiResponse<Void>> handleProductNotFoundException(HttpServletRequest request, ProductNotFoundException productNotFoundException) {
         List<String> errors = Arrays.asList(productNotFoundException.getMessage());
         ApiResponse<Void> response = ResponseUtil.error(errors, "Product does not exist", 404, request.getRequestURI());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(CustomerNotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handlePublicNotFoundException(HttpServletRequest request, CustomerNotFoundException customerNotFoundException) {
+    public ResponseEntity<ApiResponse<Void>> handleCustomerNotFoundException(HttpServletRequest request, CustomerNotFoundException customerNotFoundException) {
         List<String> errors = Arrays.asList(customerNotFoundException.getMessage());
         ApiResponse<Void> response = ResponseUtil.error(errors, "Customer does not exist", 404, request.getRequestURI());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(InsufficientStockException.class)
-    public ResponseEntity<ApiResponse<Void>> handlePublicNotFoundException(HttpServletRequest request, InsufficientStockException insufficientStockException) {
+    public ResponseEntity<ApiResponse<Void>> handleInsufficientStockException(HttpServletRequest request, InsufficientStockException insufficientStockException) {
         List<String> errors = Arrays.asList(insufficientStockException.getMessage());
-        ApiResponse<Void> response = ResponseUtil.error(errors, "Insufficient stock", 404, request.getRequestURI());
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        ApiResponse<Void> response = ResponseUtil.error(errors, "Insufficient stock", 409, request.getRequestURI());
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(InactiveProductException.class)
-    public ResponseEntity<ApiResponse<Void>> handlePublicNotFoundException(HttpServletRequest request, InactiveProductException inactiveProductException) {
+    public ResponseEntity<ApiResponse<Void>> handleProductIsInactiveException(HttpServletRequest request, InactiveProductException inactiveProductException) {
         List<String> errors = Arrays.asList(inactiveProductException.getMessage());
-        ApiResponse<Void> response = ResponseUtil.error(errors, "Product is INACTIVE", 404, request.getRequestURI());
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        ApiResponse<Void> response = ResponseUtil.error(errors, "Product is INACTIVE", 409, request.getRequestURI());
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 
 @ExceptionHandler(InactiveSupplierException.class)
-    public ResponseEntity<ApiResponse<Void>> handlePublicNotFoundException(HttpServletRequest request, InactiveSupplierException inactiveSupplierException) {
+    public ResponseEntity<ApiResponse<Void>> handleSupplierIsInactive(HttpServletRequest request, InactiveSupplierException inactiveSupplierException) {
         List<String> errors = Arrays.asList(inactiveSupplierException.getMessage());
         ApiResponse<Void> response = ResponseUtil.error(errors, "Supplier is INACTIVE", 404, request.getRequestURI());
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handlePublicNotFoundException(HttpServletRequest request, UsernameNotFoundException usernameNotFoundException) {
+    public ResponseEntity<ApiResponse<Void>> handleUsernameNotFoundException(HttpServletRequest request, UsernameNotFoundException usernameNotFoundException) {
         List<String> errors = Arrays.asList(usernameNotFoundException.getMessage());
-        ApiResponse<Void> response = ResponseUtil.error(errors, "Supplier is INACTIVE", 404, request.getRequestURI());
+        ApiResponse<Void> response = ResponseUtil.error(errors, "Username does not exist", 404, request.getRequestURI());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleUnexpectedException(HttpServletRequest request, Exception exception) {
         List<String> errors = Arrays.asList(exception.getMessage());
-        ApiResponse<Void> response = ResponseUtil.error(errors, "Unexpected exception occurred.", 404, request.getRequestURI());
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        ApiResponse<Void> response = ResponseUtil.error(errors, "Unexpected exception occurred.", 500, request.getRequestURI());
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }
