@@ -98,26 +98,28 @@ Every inventory change is recorded with:
 This provides a complete inventory audit trail.
 
 ## Rate Limiting
-
 The API uses Bucket4j to protect endpoints from abuse.
 
-Subscription Plans
-BASIC Plan
+Subscription Plans:
+# BASIC Plan
 5 requests per minute
-PROFESSIONAL Plan
+
+# PROFESSIONAL Plan
 10 requests per minute
+
 Rate Limit Headers
-
 Responses include:
+* X-RateLimit-Limit
+* X-RateLimit-Remaining
+* Retry-After
 
-X-RateLimit-Limit
-X-RateLimit-Remaining
-Retry-After
-Benefits
-Prevent API abuse
-Fair resource usage
-Protect backend services
-Improve system stability
+# Benefits
+* Prevent API abuse
+* Fair resource usage
+* Protect backend services
+* Improve system stability
+
+  
 
 ## Auditing
 The project includes basic auditing functionality:
