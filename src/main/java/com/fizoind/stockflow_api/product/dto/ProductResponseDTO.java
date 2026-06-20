@@ -10,12 +10,13 @@ public class ProductResponseDTO {
     private BigDecimal price;
     private String description;
     private ProductStatus status;
+    private String imageUrl;
     private String supplier_name;
     private String category;
 
     public ProductResponseDTO() {}
 
-    public ProductResponseDTO(String name, String sku, BigDecimal price, String description, ProductStatus status, String supplier_name, String category) {
+    public ProductResponseDTO(String name, String sku, BigDecimal price, String description, ProductStatus status, String imageUrl, String supplier_name, String category) {
         this.name = name;
         this.sku = sku;
         this.price = price;
@@ -63,6 +64,14 @@ public class ProductResponseDTO {
 
     public void setStatus(ProductStatus status) {
         this.status = status;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getSupplier_name() {

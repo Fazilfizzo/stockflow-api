@@ -48,7 +48,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
                        "message": "Too many requests. PLEASE TRY AGAIN",
                     }
                     """);
-//            response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(), "You have exhausted you API Response quota.");
+            response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(), "You have exhausted you API Response quota.");
             return false;
         }
     }

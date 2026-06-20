@@ -36,6 +36,8 @@ public class Product extends Auditable {
     @Column(nullable = false)
     private ProductStatus status;
 
+    private String imageUrl;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supplier_id", nullable = false)
     private Supplier supplier;
@@ -50,7 +52,7 @@ public class Product extends Auditable {
     public Product() {
     }
 
-    public Product(Long id, String name, String sku, BigDecimal price, int stockQuantity, String description, ProductStatus status, Supplier supplier, Category category, List<StockMovement> stockMovements) {
+    public Product(Long id, String name, String sku, BigDecimal price, int stockQuantity, String description, ProductStatus status, String imageUrl, Supplier supplier, Category category, List<StockMovement> stockMovements) {
         this.id = id;
         this.name = name;
         this.sku = sku;
@@ -58,6 +60,7 @@ public class Product extends Auditable {
         this.stockQuantity = stockQuantity;
         this.description = description;
         this.status = status;
+        this.imageUrl = imageUrl;
         this.supplier = supplier;
         this.category = category;
         this.stockMovements = stockMovements;
@@ -117,6 +120,14 @@ public class Product extends Auditable {
 
     public void setStatus(ProductStatus status) {
         this.status = status;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public Supplier getSupplier() {

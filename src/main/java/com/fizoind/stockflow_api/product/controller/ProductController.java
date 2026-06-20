@@ -3,11 +3,20 @@ package com.fizoind.stockflow_api.product.controller;
 import com.fizoind.stockflow_api.product.dto.ProductCreateDTO;
 import com.fizoind.stockflow_api.product.dto.ProductResponseDTO;
 import com.fizoind.stockflow_api.product.service.ProductService;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -20,9 +29,9 @@ public class ProductController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/products")
-    public ResponseEntity<ProductResponseDTO> createProduct(@RequestBody ProductCreateDTO productCreateDTO) {
-        return new ResponseEntity<>(productService.createProduct(productCreateDTO), HttpStatus.CREATED);
+    @PostMapping(value = "/products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProductResponseDTO> createProduct(@RequestPart("dto") ProductCreateDTO productCreateDTO, @RequestPart("image") MultipartFile file) throws IOException{
+        return new ResponseEntity<>(productService.createProduct(productCreateDTO, file), HttpStatus.CREATED);
     }
 
     @GetMapping("/products")
@@ -34,6 +43,22 @@ public class ProductController {
     @GetMapping("/products/{id}")
     public ResponseEntity<ProductResponseDTO> getProductById(@PathVariable Long id) {
         return new ResponseEntity<>(productService.getProductById(id), HttpStatus.OK);
+    }
+
+    @GetMapping("products/images/{filename}")
+    public ResponseEntity<Resource> getImage(@PathVariable String filename) throws IOException {
+        Path imagePath = Paths.get("uploads").resolve(filename);
+        org.springframework.core.io.Resource resource = new UrlResource(imagePath.toUri());
+
+        if(!resource.exists() || !resource.isReadable()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String contentType = Files.probeContentType(imagePath);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .body(resource);
     }
 
     @PreAuthorize("hasRole('ADMIN')")

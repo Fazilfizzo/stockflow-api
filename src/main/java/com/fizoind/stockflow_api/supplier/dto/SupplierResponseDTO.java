@@ -3,22 +3,32 @@ package com.fizoind.stockflow_api.supplier.dto;
 import com.fizoind.stockflow_api.supplier.entity.SupplierStatus;
 
 public class SupplierResponseDTO {
+    private Long id;
     private String name;
     private String email;
     private String phone;
     private String address;
     private SupplierStatus status;
 
-    public SupplierResponseDTO(String phone, String email, String name, String address, SupplierStatus status) {
-        this.phone = phone;
-        this.email = email;
+    public SupplierResponseDTO(Long id, String name, String email, String phone, String address, SupplierStatus status) {
+        this.id = id;
         this.name = name;
+        this.email = email;
+        this.phone = phone;
         this.address = address;
         this.status = status;
     }
 
     public SupplierResponseDTO() {
 
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getPhone() {

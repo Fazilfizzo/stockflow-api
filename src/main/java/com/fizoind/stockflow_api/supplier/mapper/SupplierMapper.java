@@ -17,6 +17,7 @@ public class SupplierMapper {
 
     public static SupplierResponseDTO supplierResponseDTO(Supplier supplier) {
         SupplierResponseDTO supplierResponseDTO = new SupplierResponseDTO();
+        supplierResponseDTO.setId(supplier.getId());
         supplierResponseDTO.setName(supplier.getName());
         supplierResponseDTO.setEmail(supplier.getEmail());
         supplierResponseDTO.setPhone(supplier.getPhone());

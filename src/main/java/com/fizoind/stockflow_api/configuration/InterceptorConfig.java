@@ -10,12 +10,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class InterceptorConfig implements WebMvcConfigurer {
 
-//    private final RateLimitInterceptor rateLimitInterceptor;
-//
-//    public InterceptorConfig(RateLimitInterceptor rateLimitInterceptor) {
-//        this.rateLimitInterceptor = rateLimitInterceptor;
-//    }
-
     private final PricingPlanService pricingPlanService;
 
     public InterceptorConfig(PricingPlanService pricingPlanService) {
@@ -30,6 +24,6 @@ public class InterceptorConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry interceptorRegistry) {
         interceptorRegistry.addInterceptor(rateLimitInterceptor())
-                .addPathPatterns("/**");
+                .addPathPatterns("/auth/login");
     }
 }

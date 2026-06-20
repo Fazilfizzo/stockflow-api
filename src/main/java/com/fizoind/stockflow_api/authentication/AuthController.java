@@ -29,8 +29,9 @@ public class AuthController {
         return ResponseEntity.ok("Registered successfully...........");
     }
 
+
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestHeader(value = "X-api-key") String apiKey, @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(authService.login(loginRequest));
     }
 
