@@ -9,13 +9,30 @@ A robust and scalable Inventory Management REST API built with Java and Spring B
 ## Authentication & Authorization
 
 * JWT-based authentication
+* Refresh token support
 * Role-based access control (Admin / User)
 * Secure login and registration system
-* Password encryption using Spring Security
+* Spring security integration
+* Password encryption using BCrypt
+
+## Refresh Token Workflow
+The API implements a complete refresh token mechanism:
+* Generate access and refresh tokens during login
+* Persist refresh tokens securely
+* Validate refresh token expiration
+* Revoke invalid or expired refresh tokens
+
 
 ## Inventory Management
 
 * Product management
+ - Create products
+ - Update products
+ - Delete products
+ - Search products
+ - Pagination and sorting
+ - Product categorization
+  
 * Category management
 * Supplier management
 * Customer management
@@ -31,8 +48,80 @@ A robust and scalable Inventory Management REST API built with Java and Spring B
 * Standardized API responses
 * Auditing support
 
-## Auditing
+## Event-Driven Order Processing
+The order creation workflow has been refactored using Spring Events.
+When an order is successfully created:
+* Order is persisted
+* OrderCreatedEvent is published
+* Event listener processes the event
+* Receipt PDF is generated
+* Receipt is emailed to the customer
 
+## PDF Receipt Generation
+Automatically generates professional PDF receipts containing:
+* Order information
+* Customer information
+* Purchased products
+* Quantities
+* Unit prices
+* Total amount
+Generated receipts are attached to customer emails.
+
+## Email Notifications
+SMTP-based email integration.
+Supported features:
+* Receipt delivery
+* PDF attachment support
+* Automated order confirmation emails
+* Event-driven email sending
+
+## Stock Tracking
+The system automatically tracks inventory changes.
+Supported stock operations:
+
+# Stock In
+Increase inventory when:
+* New inventory arrives
+* Supplier deliveries are received
+  
+# Stock Out
+Decrease inventory when:
+*Customer orders are placed
+
+# Stock Movement History
+Every inventory change is recorded with:
+* Product
+* Quantity
+* Movement type
+* Timestamp
+* User information
+This provides a complete inventory audit trail.
+
+## Rate Limiting
+The API uses Bucket4j to protect endpoints from abuse.
+
+Subscription Plans:
+# BASIC Plan
+5 requests per minute
+
+# PROFESSIONAL Plan
+10 requests per minute
+
+Rate Limit Headers
+Responses include:
+* X-RateLimit-Limit
+* X-RateLimit-Remaining
+* Retry-After
+
+# Benefits
+* Prevent API abuse
+* Fair resource usage
+* Protect backend services
+* Improve system stability
+
+  
+
+## Auditing
 The project includes basic auditing functionality:
 
 * `createdAt`
@@ -147,18 +236,9 @@ Handles:
 * Order items
 * Purchase tracking
 
-## Payment Management
-
-Handles:
-
-* Payment records
-* Payment processing logic
-* Order payment tracking
-
 ## Stock Movement
 
 Handles:
-
 * Stock in
 * Stock out
 * Inventory movement history
