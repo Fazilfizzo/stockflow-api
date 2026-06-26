@@ -41,6 +41,9 @@ build/
 *.log
 *.logs
 
+# ===== uploada =====
+./uploads
+
 # ===== OS Files =======
 .DS_store
 Thumbs.db

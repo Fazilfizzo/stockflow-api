@@ -54,7 +54,7 @@ public class ProductService {
         Category category = categoryRepository.findById(productCreateDTO.getCategoryId()).orElseThrow(() -> new CategoryNotFoundException(productCreateDTO.getCategoryId()));
         Product product = ProductMapper.toEntity(productCreateDTO, supplier, category);
         product.setSku((category.getName().substring(0, 3).toUpperCase() + "-" + productRepository.countByCategory(category) + 1));
-        product.setImageUrl(url + "/products/images/" + fileStorageService.saveFile(file));
+        product.setImageUrl(url + "products/images/" + fileStorageService.saveFile(file));
         Product saved_product = productRepository.save(product);
         return ProductMapper.toproductResponseDTO(saved_product);
     }

@@ -5,6 +5,7 @@ import com.fizoind.stockflow_api.product.entity.ProductStatus;
 import java.math.BigDecimal;
 
 public class ProductResponseDTO {
+    private Long id;
     private String name;
     private String sku;
     private BigDecimal price;
@@ -16,7 +17,8 @@ public class ProductResponseDTO {
 
     public ProductResponseDTO() {}
 
-    public ProductResponseDTO(String name, String sku, BigDecimal price, String description, ProductStatus status, String imageUrl, String supplier_name, String category) {
+    public ProductResponseDTO(Long id, String name, String sku, BigDecimal price, String description, ProductStatus status, String imageUrl, String supplier_name, String category) {
+        this.id = id;
         this.name = name;
         this.sku = sku;
         this.price = price;
@@ -24,6 +26,14 @@ public class ProductResponseDTO {
         this.status = status;
         this.supplier_name = supplier_name;
         this.category = category;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getName() {

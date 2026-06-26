@@ -29,6 +29,8 @@ public class FileStorageService {
 
         Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
+        System.out.println("filename: " + filename);
+
         return filename;
     }
 }
