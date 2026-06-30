@@ -2,6 +2,7 @@ package com.fizoind.stockflow_api.cart.service.impl;
 
 import com.fizoind.stockflow_api.authentication.CustomUserDetails;
 import com.fizoind.stockflow_api.cart.dto.AddToCartRequest;
+import com.fizoind.stockflow_api.cart.dto.CartGetResponse;
 import com.fizoind.stockflow_api.cart.dto.CartResponse;
 import com.fizoind.stockflow_api.cart.entity.Cart;
 import com.fizoind.stockflow_api.cart.mapper.CartMapper;
@@ -19,6 +20,7 @@ import com.fizoind.stockflow_api.stockmovement.exception.InsufficientStockExcept
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -37,7 +39,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public CartResponse addToCart(Long customerID, AddToCartRequest addToCartRequest) {
+    public CartResponse addToCart(AddToCartRequest addToCartRequest) {
         Long customerId = ((CustomUserDetails) SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getPrincipal())
@@ -60,6 +62,10 @@ public class CartServiceImpl implements CartService {
         CartItem cartItem = cartItemRepository.findByCartAndProduct(cart, product).orElse(null);
 
         if (cartItem == null) {
+            if (cart.getItems() == null) {
+                cart.setItems(new ArrayList<>());
+            }
+            cartItem = new CartItem();
             cartItem.setCart(cart);
             cartItem.setProduct(product);
             cartItem.setQuantity(addToCartRequest.quantity());
@@ -72,6 +78,21 @@ public class CartServiceImpl implements CartService {
         cartRepository.save(cart);
 
         return CartMapper.toCartResponse(cart);
+    }
+
+    @Override
+    public CartGetResponse getCart() {
+        Long customerId = ((CustomUserDetails) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal())
+                .getUser().getId();
+
+        Customer customer = customerRepository.findById(customerId).orElseThrow(() -> new CustomerNotFoundException(customerId));
+
+        Cart customerCart = cartRepository.findByCustomer(customer).orElseThrow(() -> new RuntimeException("Cart not found of customer"));
+
+        return CartMapper.toGetCartResponse(customerCart);
+
     }
 
 

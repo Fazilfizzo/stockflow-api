@@ -1,7 +1,9 @@
 package com.fizoind.stockflow_api.cart.mapper;
 
+import com.fizoind.stockflow_api.cart.dto.CartGetResponse;
 import com.fizoind.stockflow_api.cart.dto.CartResponse;
 import com.fizoind.stockflow_api.cart.entity.Cart;
+import com.fizoind.stockflow_api.cartItem.dto.CartItemGetResponse;
 import com.fizoind.stockflow_api.cartItem.dto.CartItemResponse;
 
 import java.math.BigDecimal;
@@ -16,7 +18,7 @@ public class CartMapper {
                         item.getProduct().getId(),
                         item.getProduct().getName(),
                         item.getProduct().getPrice(),
-                        item.getProduct().getStockQuantity(),
+                        item.getQuantity(),
                         item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity()))
                 ))
                 .toList();
@@ -30,6 +32,36 @@ public class CartMapper {
                 .sum();
 
         return new CartResponse(
+                cart.getId(),
+                items,
+                subTotal,
+                totalItems
+        );
+    }
+
+    public static CartGetResponse toGetCartResponse(Cart cart) {
+
+        List<CartItemGetResponse> items = cart.getItems().stream()
+                .map(item -> new CartItemGetResponse(
+                        item.getId(),
+                        item.getProduct().getId(),
+                        item.getProduct().getName(),
+                        item.getProduct().getImageUrl(),
+                        item.getProduct().getPrice(),
+                        item.getQuantity(),
+                        item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity()))
+                ))
+                .toList();
+
+        BigDecimal subTotal = items.stream()
+                .map(CartItemGetResponse::total)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        int totalItems = items.stream()
+                .mapToInt(CartItemGetResponse::quantity)
+                .sum();
+
+        return new CartGetResponse(
                 cart.getId(),
                 items,
                 subTotal,
