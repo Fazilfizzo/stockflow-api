@@ -4,15 +4,18 @@ import com.fizoind.stockflow_api.authentication.CustomUserDetails;
 import com.fizoind.stockflow_api.cart.dto.AddToCartRequest;
 import com.fizoind.stockflow_api.cart.dto.CartGetResponse;
 import com.fizoind.stockflow_api.cart.dto.CartResponse;
+import com.fizoind.stockflow_api.cart.dto.UpdateCartRequest;
 import com.fizoind.stockflow_api.cart.entity.Cart;
 import com.fizoind.stockflow_api.cart.mapper.CartMapper;
 import com.fizoind.stockflow_api.cart.repository.CartRepository;
 import com.fizoind.stockflow_api.cart.service.CartService;
 import com.fizoind.stockflow_api.cartItem.entity.CartItem;
+import com.fizoind.stockflow_api.cartItem.exception.CartItemException;
 import com.fizoind.stockflow_api.cartItem.repository.CartItemRepository;
 import com.fizoind.stockflow_api.customer.entity.Customer;
 import com.fizoind.stockflow_api.customer.exception.CustomerNotFoundException;
 import com.fizoind.stockflow_api.customer.repository.CustomerRepository;
+import com.fizoind.stockflow_api.exception.QuantityException;
 import com.fizoind.stockflow_api.product.entity.Product;
 import com.fizoind.stockflow_api.product.exception.ProductNotFoundException;
 import com.fizoind.stockflow_api.product.repository.ProductRepository;
@@ -39,7 +42,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public CartResponse addToCart(AddToCartRequest addToCartRequest) {
+    public CartGetResponse addToCart(AddToCartRequest addToCartRequest) {
         Long customerId = ((CustomUserDetails) SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getPrincipal())
@@ -57,6 +60,10 @@ public class CartServiceImpl implements CartService {
 
         if (addToCartRequest.quantity() <= 0) {
             throw new RuntimeException("Quantity must be greater than zero");
+        }
+
+        if (product.getStockQuantity() <= 0) {
+            throw new InsufficientStockException(product.getId());
         }
 
         CartItem cartItem = cartItemRepository.findByCartAndProduct(cart, product).orElse(null);
@@ -77,7 +84,7 @@ public class CartServiceImpl implements CartService {
 
         cartRepository.save(cart);
 
-        return CartMapper.toCartResponse(cart);
+        return CartMapper.toGetCartResponse(cart);
     }
 
     @Override
@@ -95,5 +102,57 @@ public class CartServiceImpl implements CartService {
 
     }
 
+    @Override
+    public CartGetResponse updateCartQuantity(Long cartItemId, UpdateCartRequest updateCartRequest) {
+
+        Long customerId = ((CustomUserDetails) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal())
+                .getUser().getId();
+
+        Customer customer = customerRepository.findById(customerId).orElseThrow(() -> new CustomerNotFoundException(customerId));
+
+        CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(() -> new RuntimeException("CartItem does not exist"));
+
+        Product product = cartItem.getProduct();
+
+//        if (updateCartRequest.quantity() <= 0) {
+//
+//        }
+
+        if (updateCartRequest.quantity() > product.getStockQuantity()) {
+            throw new InsufficientStockException(product.getId());
+        }
+
+        if (updateCartRequest.quantity() < 0) {
+            throw new QuantityException("Quantity must be greater than zero");
+        }
+
+        cartItem.setQuantity(updateCartRequest.quantity());
+        cartItemRepository.save(cartItem);
+
+        return CartMapper.toGetCartResponse(cartItem.getCart());
+    }
+
+
+    @Override
+    public CartGetResponse removeItem(Long cartItemId) {
+        Long customerId = ((CustomUserDetails) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal())
+                .getUser().getId();
+
+        Customer customer = customerRepository.findById(customerId).orElseThrow(() -> new CustomerNotFoundException(customerId));
+
+        CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(() -> new CartItemException("Cart item not found"));
+
+        Cart cart = cartItem.getCart();
+
+        cart.getItems().remove(cartItem);
+
+        cartItemRepository.delete(cartItem);
+
+        return CartMapper.toGetCartResponse(cart);
+    }
 
 }

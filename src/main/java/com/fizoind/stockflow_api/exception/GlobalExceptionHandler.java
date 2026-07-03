@@ -1,5 +1,6 @@
 package com.fizoind.stockflow_api.exception;
 
+import com.fizoind.stockflow_api.cartItem.exception.CartItemException;
 import com.fizoind.stockflow_api.common.ApiResponse;
 import com.fizoind.stockflow_api.common.ResponseUtil;
 import com.fizoind.stockflow_api.customer.exception.CustomerNotFoundException;
@@ -38,14 +39,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CustomerNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleCustomerNotFoundException(HttpServletRequest request, CustomerNotFoundException customerNotFoundException) {
         List<String> errors = Arrays.asList(customerNotFoundException.getMessage());
-        ApiResponse<Void> response = ResponseUtil.error(errors, "Customer does not exist", 404, request.getRequestURI());
+        ApiResponse<Void> response = ResponseUtil.error(errors, "You do not exist as a customer", 404, request.getRequestURI());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(InsufficientStockException.class)
     public ResponseEntity<ApiResponse<Void>> handleInsufficientStockException(HttpServletRequest request, InsufficientStockException insufficientStockException) {
         List<String> errors = Arrays.asList(insufficientStockException.getMessage());
-        ApiResponse<Void> response = ResponseUtil.error(errors, "Insufficient stock", 409, request.getRequestURI());
+        ApiResponse<Void> response = ResponseUtil.error(errors, "No stock available", 409, request.getRequestURI());
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 
@@ -67,6 +68,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleUsernameNotFoundException(HttpServletRequest request, UsernameNotFoundException usernameNotFoundException) {
         List<String> errors = Arrays.asList(usernameNotFoundException.getMessage());
         ApiResponse<Void> response = ResponseUtil.error(errors, "Username does not exist", 404, request.getRequestURI());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(QuantityException.class)
+    public ResponseEntity<ApiResponse<Void>> handleQuantityException(HttpServletRequest request, QuantityException quantityException) {
+        List<String> errors = Arrays.asList(quantityException.getMessage());
+        ApiResponse<Void> response = ResponseUtil.error(errors, "Quantity must be greater than zero", 404, request.getRequestURI());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(CartItemException.class)
+    public ResponseEntity<ApiResponse<Void>> handleCartItemNotFoundException(HttpServletRequest request, CartItemException cartItemException) {
+        List<String> errors = Arrays.asList(cartItemException.getMessage());
+        ApiResponse<Void> response = ResponseUtil.error(errors, "Cart item not found", 404, request.getRequestURI());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 

@@ -73,8 +73,8 @@ public class SupplierService {
     
     public void deleteSupplier(Long supplier_id) {
         Supplier supplier = supplierRepository.findById(supplier_id).orElseThrow(() -> new SupplierNotFoundException(supplier_id));
-        logger.info("supplier with id {} deleted successfully", supplier_id);
         supplierRepository.deleteById(supplier_id);
+        logger.info("supplier with id {} deleted successfully", supplier_id);
     }
 }
 
