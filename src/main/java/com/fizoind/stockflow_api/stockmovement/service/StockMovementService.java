@@ -1,5 +1,6 @@
 package com.fizoind.stockflow_api.stockmovement.service;
 
+import com.fizoind.stockflow_api.cartItem.entity.CartItem;
 import com.fizoind.stockflow_api.orderItem.dto.OrderItemDTO;
 import com.fizoind.stockflow_api.product.entity.Product;
 import com.fizoind.stockflow_api.product.exception.ProductNotFoundException;
@@ -99,6 +100,24 @@ public class StockMovementService {
         stockMovement.setProduct(product);
 //        int updated_stock = productRepository.reduceStock(product.getId(), itemDTO.getQuantity());
         product.setStockQuantity(product.getStockQuantity() - itemDTO.getQuantity());
+        product = productRepository.save(product);
+        stockMovementRepository.save(stockMovement);
+    }
+
+    public void stockOrderOutFromCart(Product product, CartItem item, Long orderId) {
+        if(item.getQuantity() > product.getStockQuantity()){
+            throw new InsufficientStockException(product.getId());
+        }
+        log.debug("Stock out validation successful");
+        StockMovement stockMovement = new StockMovement();
+        stockMovement.setQuantity(item.getQuantity());
+        stockMovement.setMovementType(MovementType.SALE);
+        stockMovement.setReason("Customer order sale");
+        stockMovement.setReference("ORDER-" + orderId);
+        stockMovement.setMovementDate(LocalDateTime.now());
+        stockMovement.setProduct(product);
+//        int updated_stock = productRepository.reduceStock(product.getId(), itemDTO.getQuantity());
+        product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
         product = productRepository.save(product);
         stockMovementRepository.save(stockMovement);
     }

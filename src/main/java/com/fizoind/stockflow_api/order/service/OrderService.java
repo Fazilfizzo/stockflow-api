@@ -1,6 +1,10 @@
 package com.fizoind.stockflow_api.order.service;
 
 import com.fizoind.stockflow_api.authentication.CustomUserDetails;
+import com.fizoind.stockflow_api.cart.entity.Cart;
+import com.fizoind.stockflow_api.cart.repository.CartRepository;
+import com.fizoind.stockflow_api.cartItem.entity.CartItem;
+import com.fizoind.stockflow_api.cartItem.exception.CartItemException;
 import com.fizoind.stockflow_api.customer.entity.Customer;
 import com.fizoind.stockflow_api.customer.exception.CustomerNotFoundException;
 import com.fizoind.stockflow_api.customer.repository.CustomerRepository;
@@ -53,17 +57,19 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final ProductRepository productRepository;
     private final StockMovementRepository stockMovementRepository;
+    private final CartRepository cartRepository;
     private final StockMovementService stockMovementService;
     private final EmailService emailService;
     private final ReceiptPdfService receiptPdfService;
     private final ApplicationEventPublisher eventPublisher;
 
-    public OrderService(CustomerRepository customerRepository, CustomerOrderRepository customerOrderRepository, OrderItemRepository orderItemRepository, ProductRepository productRepository, StockMovementRepository stockMovementRepository, StockMovementService stockMovementService, EmailService emailService, ReceiptPdfService receiptPdfService, ApplicationEventPublisher eventPublisher) {
+    public OrderService(CustomerRepository customerRepository, CustomerOrderRepository customerOrderRepository, OrderItemRepository orderItemRepository, ProductRepository productRepository, StockMovementRepository stockMovementRepository, CartRepository cartRepository, StockMovementService stockMovementService, EmailService emailService, ReceiptPdfService receiptPdfService, ApplicationEventPublisher eventPublisher) {
         this.customerRepository = customerRepository;
         this.customerOrderRepository = customerOrderRepository;
         this.orderItemRepository = orderItemRepository;
         this.productRepository = productRepository;
         this.stockMovementRepository = stockMovementRepository;
+        this.cartRepository = cartRepository;
         this.stockMovementService = stockMovementService;
         this.emailService = emailService;
         this.receiptPdfService = receiptPdfService;
@@ -144,6 +150,69 @@ public class OrderService {
 //        emailService.sendInvoice(customer.getEmail(), pdfBytes);
         eventPublisher.publishEvent(new OrderCreatedEvent(customerOrder));
     }
+
+    @Transactional(rollbackOn = Exception.class)
+    public void createOrderFromCart() {
+        Long customerId = ((CustomUserDetails) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal())
+                .getUser().getId();
+        Customer customer = customerRepository.findById(customerId).orElseThrow(() -> new CustomerNotFoundException(customerId));
+
+        Cart cart = cartRepository.findByCustomer(customer).orElseThrow(() -> new CartItemException("Cart not found of customer" + customer.getName()));
+
+        if (cart.getItems().isEmpty()) {
+            throw new CartItemException("Cart is empty");
+        }
+
+        CustomerOrder order = new CustomerOrder();
+        order.setCustomer(customer);
+        order.setStatus(OrderStatus.PENDING);
+        order.setOrderDate(LocalDateTime.now());
+
+        order = customerOrderRepository.save(order);
+
+        BigDecimal total = BigDecimal.ZERO;
+
+        List<OrderItem> orderItems = new ArrayList<>();
+
+        for (CartItem item : cart.getItems()) {
+            OrderItem orderItem = new OrderItem();
+
+            Product product = item.getProduct();
+
+            if (product.getStockQuantity() < (int) item.getQuantity()) {
+                throw new InsufficientStockException(product.getId());
+            }
+
+            orderItem.setOrder(order);
+            orderItem.setProduct(product);
+            orderItem.setQuantity(item.getQuantity());
+            orderItem.setPriceAtOrderTime(product.getPrice());
+
+            BigDecimal subTotal = product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+            orderItem.setSubTotal(subTotal);
+
+            total = total.add(subTotal);
+            orderItems.add(orderItem);
+
+            // save OrderItem
+            orderItem = orderItemRepository.save(orderItem);
+
+            // update stock, come here, stockMovement
+            stockMovementService.stockOrderOutFromCart(product, item, order.getId());
+        }
+
+        order.setOrderItems(orderItems);
+        order.setTotalAmount(total);
+
+        cart.getItems().clear();
+        cartRepository.save(cart);
+
+        // save again (updates + cascades OrderItems)
+        customerOrderRepository.save(order);
+    }
+
 
     public OrderResponseDTO getCustomerOrder(Long orderId) {
 

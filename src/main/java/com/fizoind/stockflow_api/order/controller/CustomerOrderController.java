@@ -22,9 +22,9 @@ public class CustomerOrderController {
     }
 
     @PostMapping("/orders")
-    public ResponseEntity<String> createOrder(@RequestBody OrderCreateDTO orderCreateDTO) {
-        orderService.createCustomerOrder(orderCreateDTO);
-        return new ResponseEntity<>("ORDER_CREATED!!!!!!!!!!!!!", HttpStatusCode.valueOf(201));
+    public ResponseEntity<String> createOrder() {
+        orderService.createOrderFromCart();
+        return new ResponseEntity<>("ORDER_CREATED!", HttpStatusCode.valueOf(201));
     }
 
 
