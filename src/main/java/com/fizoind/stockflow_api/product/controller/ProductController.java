@@ -3,6 +3,9 @@ package com.fizoind.stockflow_api.product.controller;
 import com.fizoind.stockflow_api.product.dto.ProductCreateDTO;
 import com.fizoind.stockflow_api.product.dto.ProductResponseDTO;
 import com.fizoind.stockflow_api.product.service.ProductService;
+import com.fizoind.stockflow_api.supplier.service.SupplierService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
@@ -22,6 +25,8 @@ import java.util.List;
 @RestController
 public class ProductController {
 
+    private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
+
     private final ProductService productService;
 
     public ProductController(ProductService productService) {
@@ -36,6 +41,7 @@ public class ProductController {
 
     @GetMapping("/products")
     public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
+        logger.info("Starting fetch all products request");
         return new ResponseEntity<>(productService.getAllProducts(), HttpStatus.OK);
     }
 

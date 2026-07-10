@@ -3,6 +3,7 @@ package com.fizoind.stockflow_api.order.entity;
 import com.fizoind.stockflow_api.auditing.Auditable;
 import com.fizoind.stockflow_api.customer.entity.Customer;
 import com.fizoind.stockflow_api.orderItem.entity.OrderItem;
+import com.fizoind.stockflow_api.payment.entity.Payment;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -32,17 +33,22 @@ public class CustomerOrder extends Auditable {
     @OneToMany(mappedBy = "order")
     private List<OrderItem> orderItems = new ArrayList<>();
 
+    @OneToMany(mappedBy = "order",
+    cascade = CascadeType.ALL)
+    private List<Payment> payments = new ArrayList<>();
+
     public CustomerOrder() {
 
     }
 
-    public CustomerOrder(Long id, LocalDateTime orderDate, BigDecimal totalAmount, OrderStatus status, Customer customer, List<OrderItem> orderItems) {
+    public CustomerOrder(Long id, LocalDateTime orderDate, BigDecimal totalAmount, OrderStatus status, Customer customer, List<OrderItem> orderItems, List<Payment> payments) {
         this.id = id;
         this.orderDate = orderDate;
         this.totalAmount = totalAmount;
         this.status = status;
         this.customer = customer;
         this.orderItems = orderItems;
+        this.payments = payments;
     }
 
     public Long getId() {
@@ -91,6 +97,27 @@ public class CustomerOrder extends Auditable {
 
     public void setOrderItems(List<OrderItem> orderItems) {
         this.orderItems = orderItems;
+    }
+
+    public List<Payment> getPayments() {
+        return payments;
+    }
+
+    public void setPayments(List<Payment> payments) {
+        this.payments = payments;
+    }
+
+    @Override
+    public String toString() {
+        return "CustomerOrder{" +
+                "id=" + id +
+                ", orderDate=" + orderDate +
+                ", totalAmount=" + totalAmount +
+                ", status=" + status +
+                ", customer=" + customer +
+                ", orderItems=" + orderItems +
+                ", payments=" + payments +
+                '}';
     }
 }
 

@@ -14,11 +14,16 @@ import java.util.UUID;
 @Component
 public class TraceRequestFilter extends OncePerRequestFilter {
 
+    private static final String CORRELATION_ID = "correlationId";
+
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
-        String traceId = UUID.randomUUID().toString();
-        MDC.put("traceId", traceId);
-        httpServletResponse.setHeader("X-Trace-Id", traceId);
+
+        String correlationId = UUID.randomUUID().toString();
+
+        MDC.put(CORRELATION_ID, correlationId);
+
+        httpServletResponse.setHeader("X-Correlation-Id", correlationId);
 
         try {
             filterChain.doFilter(httpServletRequest, httpServletResponse);

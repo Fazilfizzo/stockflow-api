@@ -152,7 +152,7 @@ public class OrderService {
     }
 
     @Transactional(rollbackOn = Exception.class)
-    public void createOrderFromCart() {
+    public String createOrderFromCart() {
         Long customerId = ((CustomUserDetails) SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getPrincipal())
@@ -211,6 +211,8 @@ public class OrderService {
 
         // save again (updates + cascades OrderItems)
         customerOrderRepository.save(order);
+
+        return String.valueOf(order.getId());
     }
 
 
