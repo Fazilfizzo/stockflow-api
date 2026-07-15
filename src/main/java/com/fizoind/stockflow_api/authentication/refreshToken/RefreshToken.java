@@ -13,6 +13,8 @@ public class RefreshToken {
 
     private String token;
 
+    private String tokenId; //UUID
+
     private String username;
 
     private Date expiryDate;
@@ -23,9 +25,10 @@ public class RefreshToken {
 
     }
 
-    public RefreshToken(Long id, String token, String username, Date expiryDate, boolean revoked) {
+    public RefreshToken(Long id, String token, String tokenId, String username, Date expiryDate, boolean revoked) {
         this.id = id;
         this.token = token;
+        this.tokenId = tokenId;
         this.username = username;
         this.expiryDate = expiryDate;
         this.revoked = revoked;
@@ -45,6 +48,14 @@ public class RefreshToken {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getTokenId() {
+        return tokenId;
+    }
+
+    public void setTokenId(String tokenId) {
+        this.tokenId = tokenId;
     }
 
     public String getUsername() {

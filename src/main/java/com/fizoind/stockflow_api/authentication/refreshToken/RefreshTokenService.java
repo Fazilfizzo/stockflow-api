@@ -43,16 +43,9 @@ public class RefreshTokenService {
     }
 
     public void validate(String refreshToken) {
-        RefreshToken token = refreshTokenRepository.findByToken(refreshToken).orElseThrow(() -> new RuntimeException("Invalid refresh token."));
-        if (token.isRevoked()) {
-            throw new RuntimeException("Refresh token expired");
-        }
+        if(passwordEncoder.matches(refreshToken, token.getToken())) {
 
-        if (token.getExpiryDate().before(new Date())) {
-            throw new RuntimeException("Refresh token expired");
-        }
-
-        passwordEncoder.matches(refreshToken, token.getToken());
+        };
     }
 
     public AuthResponse refreshAccessAndRefreshToken(RefreshRequest refreshRequest) {

@@ -198,19 +198,22 @@ public class OrderService {
 
             // save OrderItem
             orderItem = orderItemRepository.save(orderItem);
-
-            // update stock, come here, stockMovement
-            stockMovementService.stockOrderOutFromCart(product, item, order.getId());
         }
 
         order.setOrderItems(orderItems);
         order.setTotalAmount(total);
 
+        // clear cart
         cart.getItems().clear();
         cartRepository.save(cart);
 
         // save again (updates + cascades OrderItems)
         customerOrderRepository.save(order);
+
+        receiptPdfService.generateReceipt(order)
+                .thenAccept(pdfBytes -> {
+                    emailService.sendInvoice(customer.getEmail(), pdfBytes);
+                });
 
         return String.valueOf(order.getId());
     }

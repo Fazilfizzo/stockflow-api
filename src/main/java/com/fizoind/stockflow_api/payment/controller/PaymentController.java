@@ -18,9 +18,9 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
-    @PostMapping("/payment/checkout/{orderId}")
-    public ResponseEntity<?> checkout(@PathVariable Long orderId) throws StripeException {
-        String url = paymentService.createCheckout(orderId);
+    @PostMapping("/payment/checkout")
+    public ResponseEntity<?> checkout() throws StripeException {
+        String url = paymentService.createCheckout();
 
         return ResponseEntity.ok(
                 Map.of("checkoutUrl", url)

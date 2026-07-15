@@ -42,6 +42,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/auth/login").permitAll()
                         .requestMatchers("/products/images/**").permitAll()
+                        .requestMatchers("/stripe/webhook").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated()

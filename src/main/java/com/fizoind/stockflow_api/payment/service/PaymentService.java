@@ -3,6 +3,7 @@ package com.fizoind.stockflow_api.payment.service;
 import com.fizoind.stockflow_api.order.entity.CustomerOrder;
 import com.fizoind.stockflow_api.order.exception.OrderNotFoundException;
 import com.fizoind.stockflow_api.order.repository.CustomerOrderRepository;
+import com.fizoind.stockflow_api.order.service.OrderService;
 import com.fizoind.stockflow_api.payment.entity.Payment;
 import com.fizoind.stockflow_api.payment.entity.PaymentMethod;
 import com.fizoind.stockflow_api.payment.entity.PaymentStatus;
@@ -20,16 +21,19 @@ public class PaymentService {
     private final CustomerOrderRepository customerOrderRepository;
     private final PaymentRepository paymentRepository;
     private final StripeService stripeService;
+    private final OrderService orderService;
 
-    public PaymentService(CustomerOrderRepository customerOrderRepository, PaymentRepository paymentRepository, StripeService stripeService) {
+    public PaymentService(CustomerOrderRepository customerOrderRepository, PaymentRepository paymentRepository, StripeService stripeService, OrderService orderService) {
         this.customerOrderRepository = customerOrderRepository;
         this.paymentRepository = paymentRepository;
         this.stripeService = stripeService;
+        this.orderService = orderService;
     }
 
     @Transactional
-    public String createCheckout(Long orderId) throws StripeException {
-        CustomerOrder order = customerOrderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
+    public String createCheckout() throws StripeException {
+        String orderId = orderService.createOrderFromCart();
+        CustomerOrder order = customerOrderRepository.findById(Long.valueOf(orderId)).orElseThrow(() -> new OrderNotFoundException(Long.valueOf(orderId)));
 
         Payment payment = new Payment();
         payment.setOrder(order);
@@ -40,7 +44,9 @@ public class PaymentService {
         payment.setPaymentId(UUID.randomUUID().toString());
         payment.setTransactionReference("ORDER: " + order.getId());
 
-        Session session = stripeService.createCheckoutSession(order);
+        payment = paymentRepository.save(payment);
+
+        Session session = stripeService.createCheckoutSession(order, payment);
 
         payment.setStripeSessionId(session.getId());
 

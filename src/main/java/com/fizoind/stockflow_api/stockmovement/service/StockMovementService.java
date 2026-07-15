@@ -1,7 +1,9 @@
 package com.fizoind.stockflow_api.stockmovement.service;
 
 import com.fizoind.stockflow_api.cartItem.entity.CartItem;
+import com.fizoind.stockflow_api.order.entity.CustomerOrder;
 import com.fizoind.stockflow_api.orderItem.dto.OrderItemDTO;
+import com.fizoind.stockflow_api.orderItem.entity.OrderItem;
 import com.fizoind.stockflow_api.product.entity.Product;
 import com.fizoind.stockflow_api.product.exception.ProductNotFoundException;
 import com.fizoind.stockflow_api.product.repository.ProductRepository;
@@ -17,6 +19,7 @@ import com.fizoind.stockflow_api.supplier.entity.SupplierStatus;
 import com.fizoind.stockflow_api.supplier.exception.InactiveSupplierException;
 import com.fizoind.stockflow_api.supplier.exception.SupplierNotFoundException;
 import com.fizoind.stockflow_api.supplier.repository.SupplierRepository;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -120,6 +123,30 @@ public class StockMovementService {
         product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
         product = productRepository.save(product);
         stockMovementRepository.save(stockMovement);
+    }
+
+    @Transactional
+    public void reduceStock(CustomerOrder order) {
+        for (OrderItem item : order.getOrderItems()) {
+            Product product = item.getProduct();
+            Integer quantitySold = item.getQuantity();
+
+            if (product.getStockQuantity() < quantitySold) {
+                throw new InsufficientStockException(product.getId());
+            }
+
+            StockMovement stockMovement = new StockMovement();
+            stockMovement.setQuantity(item.getQuantity());
+            stockMovement.setMovementType(MovementType.SALE);
+            stockMovement.setReason("Customer order sale");
+            stockMovement.setReference("ORDER-" + order.getId());
+            stockMovement.setMovementDate(LocalDateTime.now());
+            stockMovement.setProduct(product);
+//        int updated_stock = productRepository.reduceStock(product.getId(), itemDTO.getQuantity());
+            product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
+            product = productRepository.save(product);
+            stockMovementRepository.save(stockMovement);
+        }
     }
 
 
