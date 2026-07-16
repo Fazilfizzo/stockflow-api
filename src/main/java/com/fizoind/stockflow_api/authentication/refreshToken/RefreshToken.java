@@ -1,6 +1,8 @@
 package com.fizoind.stockflow_api.authentication.refreshToken;
 
 import jakarta.persistence.*;
+
+import java.time.Instant;
 import java.util.Date;
 
 @Entity
@@ -17,7 +19,7 @@ public class RefreshToken {
 
     private String username;
 
-    private Date expiryDate;
+    private Instant expiresAt;
 
     private boolean revoked;
 
@@ -25,12 +27,12 @@ public class RefreshToken {
 
     }
 
-    public RefreshToken(Long id, String token, String tokenId, String username, Date expiryDate, boolean revoked) {
+    public RefreshToken(Long id, String token, String tokenId, String username, Instant expiresAt, boolean revoked) {
         this.id = id;
         this.token = token;
         this.tokenId = tokenId;
         this.username = username;
-        this.expiryDate = expiryDate;
+        this.expiresAt = expiresAt;
         this.revoked = revoked;
     }
 
@@ -66,12 +68,12 @@ public class RefreshToken {
         this.username = username;
     }
 
-    public Date getExpiryDate() {
-        return expiryDate;
+    public Instant getExpiresAt() {
+        return expiresAt;
     }
 
-    public void setExpiryDate(Date expiryDate) {
-        this.expiryDate = expiryDate;
+    public void setExpiresAt(Instant expiresAt) {
+        this.expiresAt = expiresAt;
     }
 
     public boolean isRevoked() {
