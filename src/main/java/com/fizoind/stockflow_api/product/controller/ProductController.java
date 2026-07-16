@@ -8,7 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,10 +43,21 @@ public class ProductController {
         return new ResponseEntity<>(productService.createProduct(productCreateDTO, file), HttpStatus.CREATED);
     }
 
+//    @GetMapping("/products")
+//    public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
+//        logger.info("Starting fetch all products request");
+//        return new ResponseEntity<>(productService.getAllProducts(), HttpStatus.OK);
+//    }
+
     @GetMapping("/products")
-    public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
-        logger.info("Starting fetch all products request");
-        return new ResponseEntity<>(productService.getAllProducts(), HttpStatus.OK);
+    public ResponseEntity<Page<ProductResponseDTO>> getProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size,
+            @RequestParam(required = false) String keyword
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        logger.info("Starting fetch products fetch page");
+        return new ResponseEntity<>(productService.getProducts(pageable, keyword), HttpStatus.OK);
     }
 
 
@@ -66,6 +81,11 @@ public class ProductController {
                 .contentType(MediaType.parseMediaType(contentType))
                 .body(resource);
     }
+
+//    @GetMapping("/products/search")
+//    public ResponseEntity<List<ProductResponseDTO>> search(@RequestParam String keyword) {
+//        return new ResponseEntity<>(productService.search(keyword), HttpStatusCode.valueOf(200));
+//    }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/products/{id}")

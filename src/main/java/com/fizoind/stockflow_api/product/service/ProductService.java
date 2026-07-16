@@ -17,6 +17,8 @@ import com.fizoind.stockflow_api.supplier.repository.SupplierRepository;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -70,6 +72,25 @@ public class ProductService {
     public ProductResponseDTO getProductById(Long product_id) {
         Product product = productRepository.findById(product_id).orElseThrow(() -> new ProductNotFoundException(product_id));
         return ProductMapper.toproductResponseDTO(product);
+    }
+
+//    public List<ProductResponseDTO> search(String keyword) {
+//        return productRepository.findByNameContainingIgnoreCase(keyword)
+//                .stream()
+//                .map(ProductMapper::toproductResponseDTO)
+//                .toList();
+//    }
+
+    public Page<ProductResponseDTO> getProducts(Pageable pageable, String keyword) {
+        Page<Product> products;
+
+        if (keyword == null || keyword.isBlank()) {
+            products = productRepository.findAll(pageable);
+        } else {
+            products = productRepository.search(keyword, pageable);
+        }
+
+        return products.map(ProductMapper::toproductResponseDTO);
     }
 
    public void deleteProduct(Long product_id) {
