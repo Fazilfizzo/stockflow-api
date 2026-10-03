@@ -30,6 +30,8 @@ import java.math.BigDecimal;
 @Service
 public class StripeService {
 
+    @Value("{default.origin}")
+    String origin;
 
     private static final Logger log = LoggerFactory.getLogger(StripeService.class);
 
@@ -63,9 +65,9 @@ public class StripeService {
                 .putMetadata("paymentId", payment.getId().toString())
 
 
-                .setSuccessUrl("http://localhost:5173/payment-success")
+                .setSuccessUrl(origin + "payment-success")
 
-                .setCancelUrl("http://localhost:5173/payment-cancel")
+                .setCancelUrl(origin + "payment-cancel")
 
 
                 .addLineItem(createLineItem(order))
