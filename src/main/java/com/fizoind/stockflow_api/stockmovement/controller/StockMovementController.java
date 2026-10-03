@@ -2,8 +2,12 @@ package com.fizoind.stockflow_api.stockmovement.controller;
 
 import com.fizoind.stockflow_api.stockmovement.dto.StockInDTO;
 import com.fizoind.stockflow_api.stockmovement.dto.StockMovementResponseDTO;
+import com.fizoind.stockflow_api.stockmovement.dto.StockMovementSummaryDto;
+import com.fizoind.stockflow_api.stockmovement.entity.MovementType;
 import com.fizoind.stockflow_api.stockmovement.service.StockMovementService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -42,5 +46,20 @@ public class StockMovementController {
     @GetMapping("stockMovement/current-stock/{id}")
     public ResponseEntity<String> getCurrentStock(@PathVariable Long id) {
         return new ResponseEntity<>(stockMovementService.getCurrentStock(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/stock-movements")
+    public ResponseEntity<List<StockMovementResponseDTO>> getMovements() {
+        return new ResponseEntity<>(stockMovementService.getMovements(), HttpStatusCode.valueOf(200));
+    }
+
+    @GetMapping("/stock-movements/{id}")
+    public ResponseEntity<StockMovementResponseDTO> getMovement(@PathVariable Long id) {
+        return new ResponseEntity<>(stockMovementService.getMovement(id), HttpStatusCode.valueOf(200));
+    }
+
+    @GetMapping("/stock-movements/summary")
+    public ResponseEntity<StockMovementSummaryDto> summary() {
+        return new ResponseEntity<>(stockMovementService.getSummary(), HttpStatusCode.valueOf(200));
     }
 }

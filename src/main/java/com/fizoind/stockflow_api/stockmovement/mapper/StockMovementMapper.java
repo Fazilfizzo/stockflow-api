@@ -19,8 +19,10 @@ public class StockMovementMapper {
         stockMovementResponseDTO.setQuantity(stockMovement.getQuantity());
         stockMovementResponseDTO.setMovementType(stockMovement.getMovementType());
         stockMovementResponseDTO.setReason(stockMovement.getReason());
+        stockMovementResponseDTO.setReference(stockMovement.getReference());
         stockMovementResponseDTO.setMovementDate(stockMovement.getMovementDate());
         stockMovementResponseDTO.setProduct_name(stockMovement.getProduct().getName());
+        stockMovementResponseDTO.setSupplierName(stockMovement.getSupplier().getName());
         return stockMovementResponseDTO;
     }
 }

@@ -116,10 +116,6 @@ public class CartServiceImpl implements CartService {
 
         Product product = cartItem.getProduct();
 
-//        if (updateCartRequest.quantity() <= 0) {
-//
-//        }
-
         if (updateCartRequest.quantity() > product.getStockQuantity()) {
             throw new InsufficientStockException(product.getId());
         }

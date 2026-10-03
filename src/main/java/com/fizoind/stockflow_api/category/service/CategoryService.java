@@ -23,6 +23,12 @@ public class CategoryService {
         return CategoryMapper.toDto(saved_category);
     }
 
+    public Category createCategory_graphql(CategoryRequestDTO categoryRequestDTO) {
+        Category category = CategoryMapper.toEntity(categoryRequestDTO);
+        categoryRepository.save(category);
+        return category;
+    }
+
     public List<CategoryResponseDTO> getAllCategories() {
         return categoryRepository.findAll()
                 .stream()

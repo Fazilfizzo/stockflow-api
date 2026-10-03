@@ -2,6 +2,7 @@ package com.fizoind.stockflow_api.authentication;
 
 import com.fizoind.stockflow_api.authentication.dto.AuthResponse;
 import com.fizoind.stockflow_api.authentication.dto.LoginRequest;
+import com.fizoind.stockflow_api.authentication.dto.LogoutRequest;
 import com.fizoind.stockflow_api.authentication.dto.RegisterRequest;
 import com.fizoind.stockflow_api.authentication.refreshToken.RefreshRequest;
 import com.fizoind.stockflow_api.authentication.refreshToken.RefreshTokenService;
@@ -33,6 +34,17 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(authService.login(loginRequest));
+    }
+
+    @PostMapping("/demo/login")
+    public ResponseEntity<AuthResponse> loginDemo() {
+        return ResponseEntity.ok(authService.loginDemo());
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody LogoutRequest logoutRequest) {
+        refreshTokenService.deleteToken(logoutRequest.refreshToken());
+        return new ResponseEntity<>("REFRESH TOKEN DELETED!!!", HttpStatusCode.valueOf(200));
     }
 
     @PostMapping("/refresh")

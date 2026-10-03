@@ -26,7 +26,7 @@ public class Customer extends Auditable {
 
     private String address;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
 

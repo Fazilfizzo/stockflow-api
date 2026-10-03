@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
     int countByCategory(Category category);
@@ -26,6 +27,14 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p")
     List<Product> getAllProducts();
 
+    // select c.name, o.total_amount from customers c join customer_orders o on o.customer_id = c.id where o.total_amount > 98000;
+    @Query("""
+SELECT p.name
+FROM Product p
+WHERE p.stockQuantity < 10
+""")
+    List<String> getLowStockProducts();
+
     @Query("""
         SELECT p
         FROM Product p
@@ -35,4 +44,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> search(@Param("keyword") String keyword, Pageable pageable);
 
     List<Product> findByNameContainingIgnoreCase(String keyword);
+
+    Optional<Product> findByName(String name);
 }

@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SupplierService {
@@ -28,9 +29,9 @@ public class SupplierService {
         this.supplierRepository = supplierRepository;
     }
 
-    public SupplierCreateDTO createSupplier(SupplierCreateDTO supplierCreateDTO) {
+    public SupplierCreateDTO createSupplier(SupplierCreateDTO supplierCreateDTO, String idempotencyKey) {
         logger.info("Starting to create supplier");
-        Supplier supplier = SupplierMapper.toEntity(supplierCreateDTO);
+        Supplier supplier = SupplierMapper.toEntity(supplierCreateDTO, idempotencyKey);
         supplier.setStatus(SupplierStatus.INACTIVE);
         Supplier saved = supplierRepository.save(supplier);
         logger.info("Supplier created successfully, {}", saved.getName());
@@ -48,6 +49,10 @@ public class SupplierService {
         Supplier supplier = supplierRepository.findById(supplier_id).orElseThrow(() -> new SupplierNotFoundException(supplier_id));
         logger.info("supplier fetched successfully {}", supplier.getName());
         return SupplierMapper.supplierResponseDTO(supplier);
+    }
+
+    public Optional<Supplier> find(String key) {
+        return supplierRepository.findByIdempotencyKey(key);
     }
 
     public SupplierResponseDTO updateSupplier(Long supplier_id, SupplierUpdateDTO supplierUpdateDTO) {

@@ -14,7 +14,10 @@ import com.fizoind.stockflow_api.supplier.entity.Supplier;
 import com.fizoind.stockflow_api.supplier.entity.SupplierStatus;
 import com.fizoind.stockflow_api.supplier.exception.SupplierNotFoundException;
 import com.fizoind.stockflow_api.supplier.repository.SupplierRepository;
+import com.fizoind.stockflow_api.supplier.service.SupplierService;
 import jakarta.annotation.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
@@ -29,6 +32,8 @@ import java.util.List;
 
 @Service
 public class ProductService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProductService.class);
 
     @Value("${default.localhost}")
     private String url;
@@ -53,10 +58,16 @@ public class ProductService {
         if ((supplier.getStatus() != SupplierStatus.ACTIVE)) {
             throw new RuntimeException("Supplier is not ACTIVE");
         }
+
         Category category = categoryRepository.findById(productCreateDTO.getCategoryId()).orElseThrow(() -> new CategoryNotFoundException(productCreateDTO.getCategoryId()));
+
         Product product = ProductMapper.toEntity(productCreateDTO, supplier, category);
         product.setSku((category.getName().substring(0, 3).toUpperCase() + "-" + productRepository.countByCategory(category) + 1));
-        product.setImageUrl(url + "products/images/" + fileStorageService.saveFile(file));
+        StringBuilder urlBuilder = new StringBuilder();
+        urlBuilder.append(url);
+        urlBuilder.append("products/images/");
+        urlBuilder.append(fileStorageService.saveFile(file));
+        product.setImageUrl(urlBuilder.toString());
         Product saved_product = productRepository.save(product);
         return ProductMapper.toproductResponseDTO(saved_product);
     }
@@ -91,6 +102,12 @@ public class ProductService {
         }
 
         return products.map(ProductMapper::toproductResponseDTO);
+    }
+
+    public void checkStock() {
+        List<String> products_low_stock = productRepository.getLowStockProducts();
+
+        logger.info("Products with low stock: {}", products_low_stock);
     }
 
    public void deleteProduct(Long product_id) {

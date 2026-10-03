@@ -1,6 +1,7 @@
 package com.fizoind.stockflow_api.order.controller;
 
 import com.fizoind.stockflow_api.order.dto.OrderCreateDTO;
+import com.fizoind.stockflow_api.order.dto.OrderDetailsDto;
 import com.fizoind.stockflow_api.order.dto.OrderResponseDTO;
 import com.fizoind.stockflow_api.order.dto.UpdateOrderStatusDTO;
 import com.fizoind.stockflow_api.order.entity.OrderStatus;
@@ -27,9 +28,9 @@ public class CustomerOrderController {
     }
 
 
-    @GetMapping("/orders/{orderId}")
-    public ResponseEntity<OrderResponseDTO> getCustomerOrder(@PathVariable Long orderId) {
-        return new ResponseEntity<>(orderService.getCustomerOrder(orderId), HttpStatusCode.valueOf(200));
+    @GetMapping("/orders/{id}")
+    public ResponseEntity<OrderDetailsDto> getCustomerOrder(@PathVariable Long id) {
+        return new ResponseEntity<>(orderService.getCustomerOrder(id), HttpStatusCode.valueOf(200));
     }
 
     @GetMapping("/orders/customers")

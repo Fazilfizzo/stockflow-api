@@ -1,0 +1,31 @@
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: stockflow-mysql
+    environment:
+      MYSQL_DATABASE: stock_flow_db
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  stockflow-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stockflow-api
+    ports:
+      - "5670:5670"
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/stock_flow_db
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_data:

@@ -69,4 +69,16 @@ public class AuthService {
 
         return new AuthResponse(accessToken, refreshToken);
     }
+
+    public AuthResponse loginDemo() {
+
+
+        User demo = userRepository.findByUsername("admin").orElseThrow(() -> new UsernameNotFoundException("user not found"));
+
+        String accessToken = jwtService.generateToken(new CustomUserDetails(demo));
+
+        String refreshToken = refreshTokenService.createToken(demo.getUsername());
+
+        return new AuthResponse(accessToken, refreshToken);
+    }
 }

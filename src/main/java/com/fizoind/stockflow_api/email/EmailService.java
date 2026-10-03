@@ -40,7 +40,7 @@ public class EmailService {
         mailSender.send(mailMessage);
     }
 
-    @Async("emailExecutor")
+    @Async("invoiceExecutor")
     public void sendInvoice(String to, byte[] pdfBytes) {
 
         try {

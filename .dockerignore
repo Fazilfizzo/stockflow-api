@@ -1,0 +1,10 @@
+.idea/
+.git/
+.gitignore
+.gitattributes
+.env
+
+target/
+logs/
+uploads/
+*iml

@@ -32,6 +32,9 @@ public class Supplier extends Auditable {
 
     private String address;
 
+    @Column(unique = true)
+    private String idempotencyKey;
+
     @Enumerated(EnumType.STRING)
     private SupplierStatus status;
 
@@ -44,12 +47,13 @@ public class Supplier extends Auditable {
     public Supplier() {
     }
 
-    public Supplier(Long id, String name, String phone, String email, String address, SupplierStatus status, List<Product> products, List<StockMovement> stockMovements) {
+    public Supplier(Long id, String name, String phone, String email, String address, String idempotencyKey, SupplierStatus status, List<Product> products, List<StockMovement> stockMovements) {
         this.id = id;
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
+        this.idempotencyKey = idempotencyKey;
         this.status = status;
         this.products = products;
         this.stockMovements = stockMovements;
@@ -93,6 +97,14 @@ public class Supplier extends Auditable {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
+    }
+
+    public void setIdempotencyKey(String idempotencyKey) {
+        this.idempotencyKey = idempotencyKey;
     }
 
     public SupplierStatus getStatus() {

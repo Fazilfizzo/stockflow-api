@@ -9,6 +9,7 @@ import com.fizoind.stockflow_api.product.exception.ProductNotFoundException;
 import com.fizoind.stockflow_api.product.repository.ProductRepository;
 import com.fizoind.stockflow_api.stockmovement.dto.StockInDTO;
 import com.fizoind.stockflow_api.stockmovement.dto.StockMovementResponseDTO;
+import com.fizoind.stockflow_api.stockmovement.dto.StockMovementSummaryDto;
 import com.fizoind.stockflow_api.stockmovement.entity.MovementType;
 import com.fizoind.stockflow_api.stockmovement.entity.StockMovement;
 import com.fizoind.stockflow_api.stockmovement.exception.InsufficientStockException;
@@ -22,6 +23,9 @@ import com.fizoind.stockflow_api.supplier.repository.SupplierRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -142,6 +146,7 @@ public class StockMovementService {
             stockMovement.setReference("ORDER-" + order.getId());
             stockMovement.setMovementDate(LocalDateTime.now());
             stockMovement.setProduct(product);
+            stockMovement.setSupplier(product.getSupplier());
 //        int updated_stock = productRepository.reduceStock(product.getId(), itemDTO.getQuantity());
             product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
             product = productRepository.save(product);
@@ -164,6 +169,39 @@ public class StockMovementService {
                 .stream()
                 .map(StockMovementMapper::toResponseDTO)
                 .toList();
+    }
+
+    public List<StockMovementResponseDTO> getMovements() {
+        System.out.println(stockMovementRepository.findAll().size());
+
+        return stockMovementRepository.findAllByOrderByCreatedAtDesc()
+                .stream()
+                .map(StockMovementMapper::toResponseDTO)
+                .toList();
+    }
+
+    public StockMovementResponseDTO getMovement(Long id) {
+        StockMovement stockMovement = stockMovementRepository.findMovementDetails(id).orElseThrow(() -> new RuntimeException("StockMovement is not available"));
+        System.out.println(stockMovement);
+
+        return StockMovementMapper.toResponseDTO(stockMovement);
+    }
+
+    public StockMovementSummaryDto getSummary() {
+        long total = stockMovementRepository.count();
+        System.out.println("Total: " + total);
+
+        long stockIn = stockMovementRepository.getTotalQuantityByMovementType(MovementType.IN);
+        System.out.println("StockIn: " + stockIn);
+
+        long stockOut = stockMovementRepository.getTotalQuantityByMovementType(MovementType.OUT);
+        System.out.println("StockOut: " + stockOut);
+
+        return new StockMovementSummaryDto(
+                total,
+                stockIn,
+                stockOut
+        );
     }
 
 }

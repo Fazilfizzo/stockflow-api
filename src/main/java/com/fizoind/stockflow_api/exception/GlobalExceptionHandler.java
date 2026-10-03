@@ -11,6 +11,8 @@ import com.fizoind.stockflow_api.supplier.exception.InactiveSupplierException;
 import com.fizoind.stockflow_api.supplier.exception.SupplierNotFoundException;
 import com.fizoind.stockflow_api.user.UsernameNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -22,10 +24,13 @@ import java.util.List;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger errorLog = LoggerFactory.getLogger("ERROR");
+
     @ExceptionHandler(SupplierNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleSupplierNotFoundException(HttpServletRequest request, SupplierNotFoundException supplierNotFoundException) {
         List<String> errors = Arrays.asList(supplierNotFoundException.getMessage());
         ApiResponse<Void> response = ResponseUtil.error(errors, "Supplier does not exist", 404, request.getRequestURI());
+        errorLog.error("Supplier does not exist");
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
@@ -33,6 +38,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleProductNotFoundException(HttpServletRequest request, ProductNotFoundException productNotFoundException) {
         List<String> errors = Arrays.asList(productNotFoundException.getMessage());
         ApiResponse<Void> response = ResponseUtil.error(errors, "Product does not exist", 404, request.getRequestURI());
+        errorLog.error("Product not found");
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
@@ -47,6 +53,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleInsufficientStockException(HttpServletRequest request, InsufficientStockException insufficientStockException) {
         List<String> errors = Arrays.asList(insufficientStockException.getMessage());
         ApiResponse<Void> response = ResponseUtil.error(errors, "No stock available", 409, request.getRequestURI());
+        errorLog.error("INSUFFICIENT STOCK");
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 

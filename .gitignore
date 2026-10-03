@@ -55,3 +55,13 @@ mvnw
 
 # ==== environmental files ====
 .env
+
+# === database backup ===
+*.sql
+stock_flow_db.sql
+
+# ==== target ====
+target /
+
+# ==== logs ===
+logs /

@@ -6,12 +6,13 @@ import com.fizoind.stockflow_api.supplier.dto.SupplierUpdateDTO;
 import com.fizoind.stockflow_api.supplier.entity.Supplier;
 
 public class SupplierMapper {
-    public static Supplier toEntity(SupplierCreateDTO supplierCreateDTO) {
+    public static Supplier toEntity(SupplierCreateDTO supplierCreateDTO, String idempotencyKey) {
         Supplier supplier = new Supplier();
         supplier.setName(supplierCreateDTO.getName());
         supplier.setEmail(supplierCreateDTO.getEmail());
         supplier.setPhone(supplierCreateDTO.getPhone());
         supplier.setAddress(supplierCreateDTO.getAddress());
+        supplier.setIdempotencyKey(idempotencyKey);
         return supplier;
     }
 

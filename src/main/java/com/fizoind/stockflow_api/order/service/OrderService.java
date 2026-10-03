@@ -10,6 +10,7 @@ import com.fizoind.stockflow_api.customer.exception.CustomerNotFoundException;
 import com.fizoind.stockflow_api.customer.repository.CustomerRepository;
 import com.fizoind.stockflow_api.email.EmailService;
 import com.fizoind.stockflow_api.order.dto.OrderCreateDTO;
+import com.fizoind.stockflow_api.order.dto.OrderDetailsDto;
 import com.fizoind.stockflow_api.order.dto.OrderResponseDTO;
 import com.fizoind.stockflow_api.order.entity.CustomerOrder;
 import com.fizoind.stockflow_api.order.entity.OrderStatus;
@@ -19,6 +20,7 @@ import com.fizoind.stockflow_api.order.mapper.OrderMapper;
 import com.fizoind.stockflow_api.order.repository.CustomerOrderRepository;
 import com.fizoind.stockflow_api.order.utils.OrderUtils;
 import com.fizoind.stockflow_api.orderItem.dto.OrderItemDTO;
+import com.fizoind.stockflow_api.orderItem.dto.OrderItemResponse;
 import com.fizoind.stockflow_api.orderItem.entity.OrderItem;
 import com.fizoind.stockflow_api.orderItem.repository.OrderItemRepository;
 import com.fizoind.stockflow_api.product.entity.Product;
@@ -34,6 +36,7 @@ import com.fizoind.stockflow_api.stockmovement.repository.StockMovementRepositor
 import com.fizoind.stockflow_api.stockmovement.service.StockMovementService;
 import com.fizoind.stockflow_api.supplier.entity.SupplierStatus;
 import com.fizoind.stockflow_api.supplier.exception.InactiveSupplierException;
+import com.fizoind.stockflow_api.user.Role;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +49,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class OrderService {
@@ -210,28 +215,25 @@ public class OrderService {
         // save again (updates + cascades OrderItems)
         customerOrderRepository.save(order);
 
-        receiptPdfService.generateReceipt(order)
-                .thenAccept(pdfBytes -> {
-                    emailService.sendInvoice(customer.getEmail(), pdfBytes);
-                });
+        eventPublisher.publishEvent(new OrderCreatedEvent(order));
 
         return String.valueOf(order.getId());
     }
 
 
-    public OrderResponseDTO getCustomerOrder(Long orderId) {
+    public OrderDetailsDto getCustomerOrder(Long orderId) {
 
-        Long customerId = ((CustomUserDetails) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal())
-                .getUser().getId();
-
-
+//        Long customerId = ((CustomUserDetails) SecurityContextHolder.getContext()
+//                .getAuthentication()
+//                .getPrincipal())
+//                .getUser().getId();
+//
+//
         CustomerOrder customerOrder = customerOrderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order Not Found"));
-        if (!customerOrder.getCustomer().getId().equals(customerId)) {
-            throw new RuntimeException("Unauthorized!!!!!!!!!!!!!!!!!!!!!");
-        }
-        return OrderMapper.toOrderResponseDto(customerOrder);
+//        if (!customerOrder.getCustomer().getId().equals(customerId) || !(customerOrder.getCustomer().getUser().getRole() == Role.ROLE_ADMIN)) {
+//            throw new RuntimeException("Unauthorized!!!!!!!!!!!!!!!!!!!!!");
+//        }
+        return OrderMapper.toOrderDetailsDto(customerOrder);
     }
 
     public List<OrderResponseDTO> getCustomerOrders() {
@@ -254,10 +256,28 @@ public class OrderService {
     }
 
     public List<OrderResponseDTO> getAllOrders() {
-        return customerOrderRepository.getAllOrders()
-                .stream()
-                .map(OrderMapper::toOrderResponseDto)
+        List<CustomerOrder> orders = customerOrderRepository.findAllByOrderByCreatedAtDesc();
+        List<OrderResponseDTO> dtos = orders.stream()
+                .map(order -> new OrderResponseDTO(
+                        order.getId(),
+                        order.getCustomer().getName(),
+                        order.getOrderDate(),
+                        order.getTotalAmount(),
+                        order.getStatus(),
+                        customerOrderRepository.getNumberOfItems(order.getId()),
+                        order.getOrderItems().stream()
+                                .map(item -> {
+                                    OrderItemResponse  orderItemResponse = new OrderItemResponse();
+                                    orderItemResponse.setProductName(item.getProduct().getName());
+                                    orderItemResponse.setQuantity(item.getQuantity());
+                                    orderItemResponse.setPrice(item.getPriceAtOrderTime());
+                                    orderItemResponse.setSubTotal(item.getSubTotal());
+                                    return orderItemResponse;
+                                })
+                                .toList()
+                ))
                 .toList();
+        return dtos;
     }
 
     public List<OrderResponseDTO> getCustomerOrdersByStatus(Long customerId, OrderStatus status) {

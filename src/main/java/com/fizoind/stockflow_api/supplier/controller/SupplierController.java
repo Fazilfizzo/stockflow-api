@@ -1,9 +1,11 @@
 package com.fizoind.stockflow_api.supplier.controller;
 
+import com.fizoind.stockflow_api.common.ErrorDto;
 import com.fizoind.stockflow_api.supplier.dto.StatusDTO;
 import com.fizoind.stockflow_api.supplier.dto.SupplierCreateDTO;
 import com.fizoind.stockflow_api.supplier.dto.SupplierResponseDTO;
 import com.fizoind.stockflow_api.supplier.dto.SupplierUpdateDTO;
+import com.fizoind.stockflow_api.supplier.entity.Supplier;
 import com.fizoind.stockflow_api.supplier.service.SupplierService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -11,7 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class SupplierController {
@@ -24,8 +28,20 @@ public class SupplierController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/supplier")
-    public ResponseEntity<SupplierCreateDTO> createSupplier(@Valid @RequestBody SupplierCreateDTO supplierCreateDTO) {
-        return new ResponseEntity<>(supplierService.createSupplier(supplierCreateDTO), HttpStatus.CREATED);
+    public ResponseEntity<?> createSupplier(@Valid @RequestBody SupplierCreateDTO supplierCreateDTO, @RequestHeader("Idempotency-Key") String idempotencyKey) {
+        Optional<Supplier> existing = supplierService.find(idempotencyKey);
+
+        if (existing.isPresent()) {
+            ErrorDto error = ErrorDto.builder()
+                    .status("FAILED")
+                    .message("Supplier already created")
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+        else {
+            return new ResponseEntity<>(supplierService.createSupplier(supplierCreateDTO, idempotencyKey), HttpStatus.CREATED);
+        }
     }
 
     @PreAuthorize("hasRole('ADMIN')")

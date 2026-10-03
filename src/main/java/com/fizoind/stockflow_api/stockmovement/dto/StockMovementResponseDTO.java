@@ -9,18 +9,22 @@ public class StockMovementResponseDTO {
     private Integer quantity;
     private MovementType movementType;
     private String reason;
+    private String reference;
     private LocalDateTime movementDate;
     private String product_name;
+    private  String supplierName;
 
     public StockMovementResponseDTO(){}
 
-    public StockMovementResponseDTO(Long id, Integer quantity, MovementType movementType, String reason, LocalDateTime movementDate, String product_name) {
+    public StockMovementResponseDTO(Long id, Integer quantity, MovementType movementType, String reason, String reference, LocalDateTime movementDate, String product_name, String supplierName) {
         this.id = id;
         this.quantity = quantity;
         this.movementType = movementType;
         this.reason = reason;
+        this.reference = reference;
         this.movementDate = movementDate;
         this.product_name = product_name;
+        this.supplierName = supplierName;
     }
 
     public Long getId() {
@@ -55,6 +59,14 @@ public class StockMovementResponseDTO {
         this.reason = reason;
     }
 
+    public String getReference() {
+        return reference;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
+
     public LocalDateTime getMovementDate() {
         return movementDate;
     }
@@ -69,5 +81,13 @@ public class StockMovementResponseDTO {
 
     public void setProduct_name(String product_name) {
         this.product_name = product_name;
+    }
+
+    public String getSupplierName() {
+        return supplierName;
+    }
+
+    public void setSupplierName(String supplierName) {
+        this.supplierName = supplierName;
     }
 }

@@ -1,153 +1,382 @@
 package com.fizoind.stockflow_api.receipt;
 
+
 import com.fizoind.stockflow_api.order.entity.CustomerOrder;
 import com.fizoind.stockflow_api.orderItem.entity.OrderItem;
 import org.openpdf.text.*;
 import org.openpdf.text.Font;
 import org.openpdf.text.Image;
-import org.openpdf.text.Rectangle;
-import org.openpdf.text.pdf.PdfPCell;
-import org.openpdf.text.pdf.PdfPTable;
-import org.openpdf.text.pdf.PdfWriter;
-import org.openpdf.text.pdf.draw.LineSeparator;
+import org.openpdf.text.pdf.*;
+
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
+
 
 @Service
 public class ReceiptPdfService {
 
-        @Async("invoiceExecutor")
-        public CompletableFuture<byte[]> generateReceipt(CustomerOrder order) {
 
-            try {
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-                Document document = new Document(PageSize.A4);
-                PdfWriter.getInstance(document, out);
-
-                document.open();
-
-                // ================= HEADER =================
-//                Font titleFont = new Font(Font.HELVETICA, 20, Font.BOLD);
-                Image logo = Image.getInstance("src/main/resources/logoipsum-417.png");
-                logo.scaleToFit(100, 100);
-                logo.setAlignment(Element.ALIGN_RIGHT);
-                document.add(logo);
-
-//                Paragraph title = new Paragraph("STOCKFLOW INVOICE", titleFont);
-//                title.setAlignment(Element.ALIGN_CENTER);
-//                document.add(title);
-
-                document.add(new Paragraph(" "));
-
-                // ================= COMPANY INFO =================
-                Font small = new Font(Font.HELVETICA, 10);
-                document.add(new Paragraph("Stockflow API System", small));
-                document.add(new Paragraph("Email: support@stockflow.com", small));
-                document.add(new Paragraph(" "));
+    private static final Color PRIMARY =
+            new Color(41,128,185);
 
 
-                // ========== PHRASE ============
-                Font titleFont = new Font(Font.HELVETICA, 10, Font.BOLD, Color.WHITE);
+    private static final Color LIGHT_GRAY =
+            new Color(245,245,245);
 
-                PdfPCell titleCell = new PdfPCell(new Phrase("INVOICE", titleFont));
-                titleCell.setBackgroundColor(new Color(41, 128, 185));
-                titleCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-                titleCell.setPadding(10);
-                titleCell.setBorder(Rectangle.NO_BORDER);
-                document.add(titleCell);
 
-                LineSeparator line = new LineSeparator();
-                line.setLineColor(new Color(189, 195, 199));
-                document.add(line);
 
-                // ================= ORDER INFO TABLE =================
-                PdfPTable infoTable = new PdfPTable(2);
-                infoTable.setWidthPercentage(90);
-                infoTable.setWidths(new float[]{1.5f, 2.5f});
+    @Async("invoiceExecutor")
+    public CompletableFuture<byte[]> generateReceipt(
+            CustomerOrder order
+    ) {
 
-                infoTable.addCell("Invoice ID");
 
-                infoTable.addCell(String.valueOf(order.getId()));
+        try {
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-                infoTable.addCell("Date");
-                infoTable.addCell(order.getCreatedAt().toString());
+            Document document = new Document(PageSize.A4);
 
-                infoTable.addCell("Customer ID");
-                infoTable.addCell(String.valueOf(order.getCustomer().getId()));
+            PdfWriter.getInstance(
+                    document,
+                    output
+            );
 
-                document.add(infoTable);
+            document.open();
 
-                document.add(new Paragraph(" "));
+            addHeader(document);
 
-                // ================= ITEM TABLE =================
-                PdfPTable table = new PdfPTable(4);
-                table.setWidthPercentage(90);
+            addCompanyInformation(document);
 
-                // Header row styling
-                String[] headers = {"Product", "Quantity", "Price", "Total"};
-                Font header_font = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11, new Color(80, 80, 80));
-                Font value_font = FontFactory.getFont(FontFactory.HELVETICA, 11, Color.BLACK);
-                for (String h : headers) {
-                    PdfPCell cell = new PdfPCell(new Phrase(h, header_font));
-                    cell.setBackgroundColor(Color.LIGHT_GRAY);
-                    table.addCell(cell);
-                }
+            addInvoiceTitle(document);
 
-               BigDecimal grandTotal = BigDecimal.ZERO;
+            addOrderInformation(
+                    document,
+                    order
+            );
 
-                for (OrderItem item : order.getOrderItems()) {
+            BigDecimal total =
+                    addItemsTable(
+                            document,
+                            order
+                    );
 
-                    table.addCell(item.getProduct().getName());
-                    table.addCell(String.valueOf(item.getQuantity()));
-                    table.addCell(String.valueOf(item.getProduct().getPrice()));
+            addTotalSection(
+                    document,
+                    total
+            );
 
-                    BigDecimal total = item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
-                    table.addCell(String.valueOf(total));
+            addFooter(document);
 
-                    grandTotal = grandTotal.add(total);
-                }
+            document.close();
 
-                document.add(table);
+            return CompletableFuture.completedFuture(
+                    output.toByteArray()
+            );
 
-                document.add(new Paragraph(" "));
+        } catch(Exception e){
 
-                // ================= TOTAL SECTION =================
-                Font totalFont = new Font(Font.HELVETICA, 14, Font.BOLD);
+            throw new RuntimeException(
+                    "Failed to generate receipt PDF",
+                    e
+            );
 
-                Paragraph total = new Paragraph(
-                        "TOTAL AMOUNT: " + grandTotal,
-                        totalFont
-                );
-
-                total.setAlignment(Element.ALIGN_RIGHT);
-                document.add(total);
-
-                document.add(new Paragraph(" "));
-
-                // ================= FOOTER =================
-                Font footerFont = new Font(Font.HELVETICA, 9, Font.ITALIC);
-
-                Paragraph footer = new Paragraph(
-                        "Thank you for using Stockflow. This is a system-generated invoice.",
-                        footerFont
-                );
-
-                footer.setAlignment(Element.ALIGN_CENTER);
-                document.add(footer);
-
-                document.close();
-
-                return CompletableFuture.completedFuture(out.toByteArray());
-
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to generate receipt PDF", e);
-            }
         }
+
     }
 
+
+
+
+
+    private void addHeader(
+            Document document
+    ) throws Exception {
+
+        Image logo = Image.getInstance(
+                        getClass().getResource(
+                                "/logoipsum-417.png"
+                                )
+                );
+
+
+        logo.scaleToFit(
+                90,
+                90
+        );
+
+        logo.setAlignment(
+                Element.ALIGN_RIGHT
+        );
+
+        document.add(logo);
+
+    }
+
+
+    private void addCompanyInformation(Document document) throws DocumentException {
+
+        Font font = FontFactory.getFont(
+                        FontFactory.HELVETICA,
+                        10
+                );
+
+
+        document.add(new Paragraph(
+                        "StockFlow Inventory System",
+                        FontFactory.getFont(
+                                FontFactory.HELVETICA_BOLD,
+                                12
+                        )
+                )
+        );
+
+        document.add(
+                new Paragraph(
+                        "Email: support@stockflow.com",
+                        font
+                )
+        );
+
+        document.add(new Paragraph(" "));
+
+    }
+
+
+    private void addInvoiceTitle(Document document) throws DocumentException {
+
+        PdfPTable table = new PdfPTable(1);
+
+        table.setWidthPercentage(100);
+
+        Font font = new Font(
+                        Font.HELVETICA,
+                        18,
+                        Font.BOLD,
+                        Color.WHITE
+                );
+
+        PdfPCell cell = new PdfPCell(new Phrase(
+                                "PAYMENT RECEIPT",
+                                font
+                        )
+                );
+
+        cell.setBackgroundColor(PRIMARY);
+
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+
+        cell.setPadding(12);
+
+        cell.setBorder(Rectangle.NO_BORDER);
+
+        table.addCell(cell);
+
+        document.add(table);
+
+        document.add(new Paragraph(" "));
+
+    }
+
+
+    private void addOrderInformation(Document document, CustomerOrder order) throws DocumentException {
+
+        PdfPTable table = new PdfPTable(2);
+
+        table.setWidthPercentage(100);
+
+        addInfoRow(
+                table,
+                "Invoice ID",
+                "#" + order.getId()
+        );
+
+        addInfoRow(
+                table,
+                "Customer",
+                order.getCustomer()
+                        .getName()
+        );
+
+        addInfoRow(
+                table,
+                "Order Date",
+                order.getCreatedAt()
+                        .toString()
+        );
+
+        addInfoRow(
+                table,
+                "Status",
+                order.getStatus()
+                        .name()
+        );
+
+        document.add(table);
+
+        document.add(new Paragraph(" "));
+
+    }
+
+    private BigDecimal addItemsTable(Document document, CustomerOrder order) throws DocumentException {
+
+        PdfPTable table = new PdfPTable(4);
+
+        table.setWidthPercentage(100);
+
+        table.setWidths(
+                new float[]{
+                        3,
+                        1,
+                        1.5f,
+                        1.5f
+                }
+        );
+
+        String[] headers = {"Product", "Qty", "Price", "Total"};
+
+        for(String header: headers){
+
+            PdfPCell cell =
+                    new PdfPCell(
+                            new Phrase(
+                                    header,
+                                    FontFactory.getFont(
+                                            FontFactory.HELVETICA_BOLD,
+                                            10
+                                    )
+                            )
+                    );
+
+
+            cell.setBackgroundColor(LIGHT_GRAY);
+
+            cell.setPadding(8);
+
+            table.addCell(cell);
+        }
+
+        BigDecimal grandTotal = BigDecimal.ZERO;
+
+        for(OrderItem item : order.getOrderItems()){
+
+            BigDecimal itemTotal =
+                    item.getProduct()
+                            .getPrice()
+                            .multiply(
+                                    BigDecimal.valueOf(
+                                            item.getQuantity()
+                                    )
+                            );
+
+
+            table.addCell(
+                    item.getProduct()
+                            .getName()
+            );
+
+
+            table.addCell(
+                    String.valueOf(
+                            item.getQuantity()
+                    )
+            );
+
+
+            table.addCell(
+                    formatMoney(
+                            item.getProduct()
+                                    .getPrice()
+                    )
+            );
+
+
+            table.addCell(
+                    formatMoney(
+                            itemTotal
+                    )
+            );
+
+
+            grandTotal =
+                    grandTotal.add(
+                            itemTotal
+                    );
+
+        }
+
+        document.add(table);
+
+        return grandTotal;
+
+    }
+
+    private void addTotalSection(Document document, BigDecimal total) throws DocumentException {
+
+        Paragraph paragraph =
+                new Paragraph(
+                        "TOTAL PAID: "
+                                +
+                                formatMoney(total),
+
+                        new Font(
+                                Font.HELVETICA,
+                                14,
+                                Font.BOLD
+                        )
+                );
+
+
+        paragraph.setAlignment(Element.ALIGN_RIGHT);
+
+        document.add(paragraph);
+
+        document.add(new Paragraph(" "));
+    }
+
+
+    private void addFooter(Document document) throws DocumentException {
+
+        Paragraph footer =
+                new Paragraph(
+                        "Thank you for shopping with StockFlow.\n"
+                                +
+                                "This receipt was automatically generated.",
+                        new Font(
+                                Font.HELVETICA,
+                                9,
+                                Font.ITALIC
+                        )
+                );
+
+
+        footer.setAlignment(Element.ALIGN_CENTER);
+
+        document.add(footer);
+    }
+
+    private void addInfoRow(PdfPTable table, String key, String value){
+
+        table.addCell(key);
+        table.addCell(value);
+
+    }
+
+    private String formatMoney(BigDecimal amount){
+
+        return NumberFormat
+                .getCurrencyInstance(
+                        Locale.US
+                )
+                .format(amount);
+
+    }
+
+}

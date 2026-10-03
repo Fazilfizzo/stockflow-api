@@ -21,4 +21,15 @@ public interface CustomerOrderRepository extends JpaRepository<CustomerOrder, Lo
 
     @Query("SELECT o FROM CustomerOrder o")
     List<CustomerOrder> getAllOrders();
+
+    List<CustomerOrder> findTop5ByOrderByCreatedAtDesc();
+
+    List<CustomerOrder> findAllByOrderByCreatedAtDesc();
+
+    @Query("""
+SELECT COALESCE(SUM(oi.quantity), 0)
+FROM OrderItem oi
+WHERE oi.order.id = :orderId
+""")
+    Integer getNumberOfItems(@Param("orderId") Long orderId);
 }

@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public class OrderItemResponse {
     private String productName;
-    private int quantity;
+    private Integer quantity;
     private BigDecimal price;
     private BigDecimal subTotal;
 
@@ -27,11 +27,11 @@ public class OrderItemResponse {
         this.productName = productName;
     }
 
-    public int getQuantity() {
+    public Integer getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(Integer quantity) {
         this.quantity = quantity;
     }
 
