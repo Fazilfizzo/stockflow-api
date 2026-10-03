@@ -19,36 +19,63 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String apiKey = request.getHeader("X-API-KEY");
-        if (apiKey == null || apiKey.isBlank()) {
-            response.sendError(HttpStatus.BAD_REQUEST.value(), "Missing header: X-api-key");
+    public boolean preHandle(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Object handler
+    ) throws Exception {
 
+        // Allow CORS preflight requests
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true;
+        }
+
+        String apiKey = request.getHeader("X-API-KEY");
+
+        if (apiKey == null || apiKey.isBlank()) {
+            response.sendError(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Missing header: X-API-KEY"
+            );
             return false;
         }
 
         Bucket tokenBucket = pricingPlanService.resolveBucket(apiKey);
 
+        ConsumptionProbe probe =
+                tokenBucket.tryConsumeAndReturnRemaining(1);
 
-
-        ConsumptionProbe probe = tokenBucket.tryConsumeAndReturnRemaining(1);
         System.out.println("Consumed? " + probe.isConsumed());
+
         if (probe.isConsumed()) {
-            response.addHeader("X-Rate-Limiting", String.valueOf(probe.getRemainingTokens()));
+
+            response.addHeader(
+                    "X-Rate-Limiting",
+                    String.valueOf(probe.getRemainingTokens())
+            );
+
             return true;
+
         } else {
-            long waitForRefill = probe.getNanosToWaitForRefill() / 1_000_000_000;
-            response.addHeader("X-Rate-Limiting", String.valueOf(waitForRefill));
+
+            long waitForRefill =
+                    probe.getNanosToWaitForRefill() / 1_000_000_000;
+
+            response.addHeader(
+                    "X-Rate-Limiting",
+                    String.valueOf(waitForRefill)
+            );
 
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             response.setContentType("application/json");
+
             response.getWriter().write("""
-                    {
-                       "error": "RATE_LIMIT_EXCEEDED",
-                       "message": "Too many requests. PLEASE TRY AGAIN",
-                    }
-                    """);
-            response.sendError(HttpStatus.TOO_MANY_REQUESTS.value(), "You have exhausted you API Response quota.");
+        {
+            "error": "RATE_LIMIT_EXCEEDED",
+            "message": "Too many requests. Please try again later."
+        }
+        """);
+
             return false;
         }
     }
