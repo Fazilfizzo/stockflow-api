@@ -9,9 +9,12 @@ import com.fizoind.stockflow_api.payment.entity.Payment;
 import com.fizoind.stockflow_api.payment.entity.PaymentMethod;
 import com.fizoind.stockflow_api.payment.entity.PaymentStatus;
 import com.fizoind.stockflow_api.payment.repository.PaymentRepository;
+import com.fizoind.stockflow_api.product.service.ProductService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 
@@ -21,6 +24,7 @@ import java.util.UUID;
 
 @Service
 public class PaymentService {
+    private static final Logger logger = LoggerFactory.getLogger(PaymentService.class);
 
     private final CustomerOrderRepository customerOrderRepository;
     private final PaymentRepository paymentRepository;
@@ -96,7 +100,7 @@ public class PaymentService {
         payment =
                 paymentRepository.save(payment);
 
-
+       logger.debug("Starting stripe checkout");
 
         // 3. Create Stripe checkout session
         Session session =
@@ -105,17 +109,16 @@ public class PaymentService {
                         payment
                 );
 
-
+        logger.debug("Stripe checkout created with id: {}", session.getId());
 
         // 4. Store Stripe session ID
         payment.setStripeSessionId(
                 session.getId()
         );
 
+        logger.debug("Stripe session successful");
 
         paymentRepository.save(payment);
-
-
 
         return session.getUrl();
     }
