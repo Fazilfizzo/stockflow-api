@@ -1,5 +1,6 @@
 package com.fizoind.stockflow_api.email;
 
+import com.resend.services.emails.model.Attachment;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import java.util.Base64;
+
 @Service
 public class EmailService {
 
@@ -19,9 +22,11 @@ public class EmailService {
     String from;
 
     private final JavaMailSender mailSender;
+    private final ResendEmailService resendEmailService;
 
-    public EmailService(JavaMailSender mailSender) {
+    public EmailService(JavaMailSender mailSender, ResendEmailService resendEmailService) {
         this.mailSender = mailSender;
+        this.resendEmailService = resendEmailService;
     }
 
     @Async("emailExecutor")
@@ -44,23 +49,21 @@ public class EmailService {
     public void sendInvoice(String to, byte[] pdfBytes) {
 
         try {
-            MimeMessage message = mailSender.createMimeMessage();
 
-            MimeMessageHelper helper =
-                    new MimeMessageHelper(message, true);
+            String base64Pdf = Base64.getEncoder().encodeToString(pdfBytes);
 
-            helper.setFrom(from, "Stockflow");
-            helper.setTo(to);
-            helper.setSubject("Stockflow Invoice");
+            Attachment attachment = Attachment.builder()
+                    .fileName("invoice.pdf")
+                    .content(base64Pdf)
+                    .build();
 
-            helper.setText("Your invoice is attached.");
+            String subject = "StockFlow invoice";
 
-            helper.addAttachment(
-                    "invoice.pdf",
-                    new ByteArrayResource(pdfBytes), "application/pdf"
-            );
+            String html = """
+                    <p>Hello,</p> <p>Thank you for your order.</p> <p>Your invoice is attached to this email.</p> <p>Regards,<br>StockFlow</p> 
+                    """;
 
-            mailSender.send(message);
+            resendEmailService.sendEmail(to, subject, html, attachment);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
