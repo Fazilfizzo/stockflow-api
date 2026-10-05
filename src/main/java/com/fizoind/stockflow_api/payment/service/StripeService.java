@@ -57,6 +57,8 @@ public class StripeService {
 
         log.info("starting to create checkout session");
 
+
+
         SessionCreateParams params = SessionCreateParams.builder()
 
                 .setMode(SessionCreateParams.Mode.PAYMENT)
@@ -75,10 +77,23 @@ public class StripeService {
 
                 .build();
 
-        log.info("Session created successfully on return url: {}", params.getReturnUrl());
+        log.info("Session created successfully on return url: {}", params.getSuccessUrl());
 
 
-        return Session.create(params);
+        log.info("Stripe session parameters created successfully");
+
+        try {
+            Session session = Session.create(params);
+
+            log.info("Stripe Checkout session created successfully: {}",
+                    session.getId());
+
+            return session;
+
+        } catch (StripeException e) {
+            log.error("Stripe Checkout session creation failed", e);
+            throw e;
+        }
 
     }
 
