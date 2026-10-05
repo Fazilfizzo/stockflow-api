@@ -55,7 +55,7 @@ public class StripeService {
 
     public Session createCheckoutSession(CustomerOrder order, Payment payment) throws StripeException {
 
-        log.debug("starting to create checkout session");
+        log.info("starting to create checkout session");
 
         SessionCreateParams params = SessionCreateParams.builder()
 
@@ -75,7 +75,7 @@ public class StripeService {
 
                 .build();
 
-        log.debug("Session created successfully on return url: {}", params.getReturnUrl());
+        log.info("Session created successfully on return url: {}", params.getReturnUrl());
 
 
         return Session.create(params);
@@ -114,7 +114,7 @@ public class StripeService {
 
     public void processWebhook(String payload, String signature) {
 
-        log.debug("Starting to process webhook with payload: {}", payload);
+        log.info("Starting to process webhook with payload: {}", payload);
 
 
         Event event;

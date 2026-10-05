@@ -100,7 +100,7 @@ public class PaymentService {
         payment =
                 paymentRepository.save(payment);
 
-       logger.debug("Starting stripe checkout");
+       logger.info("Starting stripe checkout");
 
         // 3. Create Stripe checkout session
         Session session =
@@ -109,14 +109,14 @@ public class PaymentService {
                         payment
                 );
 
-        logger.debug("Stripe checkout created with id: {}", session.getId());
+        logger.info("Stripe checkout created with id: {}", session.getId());
 
         // 4. Store Stripe session ID
         payment.setStripeSessionId(
                 session.getId()
         );
 
-        logger.debug("Stripe session successful");
+        logger.info("Stripe session successful");
 
         paymentRepository.save(payment);
 
