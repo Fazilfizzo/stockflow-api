@@ -100,6 +100,14 @@ public class StripeService {
 
     private SessionCreateParams.LineItem createLineItem(CustomerOrder order) {
 
+        BigDecimal amount = order.getTotalAmount();
+
+        log.info("Order amount from database = {}", amount);
+
+        long stripeAmount = amount.longValue();
+
+        log.info("Amount being sent to Stripe = {}", stripeAmount);
+
         return SessionCreateParams.LineItem.builder()
 
                 .setQuantity(1L)
@@ -110,7 +118,7 @@ public class StripeService {
 
                                 .setCurrency("tzs")
 
-                                .setUnitAmount(order.getTotalAmount().longValue())
+                                .setUnitAmount(stripeAmount)
 
                                 .setProductData(
 
