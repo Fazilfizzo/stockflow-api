@@ -30,7 +30,7 @@ import java.math.BigDecimal;
 @Service
 public class StripeService {
 
-    @Value("{default.origin}")
+    @Value("${default.origin}")
     String origin;
 
     private static final Logger log = LoggerFactory.getLogger(StripeService.class);
