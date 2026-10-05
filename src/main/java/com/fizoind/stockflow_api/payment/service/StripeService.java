@@ -108,9 +108,9 @@ public class StripeService {
 
                         SessionCreateParams.LineItem.PriceData.builder()
 
-                                .setCurrency("usd")
+                                .setCurrency("tzs")
 
-                                .setUnitAmount(order.getTotalAmount().multiply(BigDecimal.valueOf(100)).longValue())
+                                .setUnitAmount(order.getTotalAmount().longValue())
 
                                 .setProductData(
 
