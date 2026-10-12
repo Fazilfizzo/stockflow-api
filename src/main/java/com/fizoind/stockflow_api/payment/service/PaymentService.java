@@ -12,7 +12,7 @@ import com.fizoind.stockflow_api.payment.repository.PaymentRepository;
 import com.fizoind.stockflow_api.product.service.ProductService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -46,7 +46,7 @@ public class PaymentService {
 
 
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public String createCheckout() throws StripeException {
 
 
@@ -94,8 +94,6 @@ public class PaymentService {
         payment.setTransactionReference(
                 "ORDER:" + order.getId()
         );
-
-
 
         payment =
                 paymentRepository.save(payment);

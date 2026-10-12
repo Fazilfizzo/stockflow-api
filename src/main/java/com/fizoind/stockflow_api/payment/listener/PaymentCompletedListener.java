@@ -34,26 +34,10 @@ public class PaymentCompletedListener {
     @TransactionalEventListener(
             phase = TransactionPhase.AFTER_COMMIT
     )
-    public void handle(
-            PaymentCompletedEvent event
-    ) {
-
-
-        receiptPdfService
-                .generateReceipt(
-                        event.getOrder()
-                )
+    public void handle(PaymentCompletedEvent event) {
+        receiptPdfService.generateReceipt(event.getOrder())
                 .thenAccept(pdfBytes -> {
-
-
-                    emailService.sendInvoice(
-                            event.getOrder()
-                                    .getCustomer()
-                                    .getEmail(),
-
-                            pdfBytes
-                    );
-
+                    emailService.sendInvoice(event.getOrder().getCustomer().getEmail(), pdfBytes);
                 });
 
     }

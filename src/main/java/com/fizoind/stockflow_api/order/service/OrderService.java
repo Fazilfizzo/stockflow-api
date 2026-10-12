@@ -37,7 +37,7 @@ import com.fizoind.stockflow_api.stockmovement.service.StockMovementService;
 import com.fizoind.stockflow_api.supplier.entity.SupplierStatus;
 import com.fizoind.stockflow_api.supplier.exception.InactiveSupplierException;
 import com.fizoind.stockflow_api.user.Role;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -81,7 +81,7 @@ public class OrderService {
         this.eventPublisher = eventPublisher;
     }
 
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional(rollbackFor = Exception.class)
     public void createCustomerOrder(OrderCreateDTO dto) {
 
         String customerName = ((CustomUserDetails) SecurityContextHolder.getContext()
@@ -156,7 +156,7 @@ public class OrderService {
         eventPublisher.publishEvent(new OrderCreatedEvent(customerOrder));
     }
 
-    @Transactional(rollbackOn = Exception.class)
+    @Transactional(rollbackFor = Exception.class)
     public String createOrderFromCart() {
         Long customerId = ((CustomUserDetails) SecurityContextHolder.getContext()
                 .getAuthentication()
