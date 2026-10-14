@@ -17,6 +17,12 @@ public class PaymentCompletedListener {
     private final EmailService emailService;
     private final ReceiptPdfService receiptPdfService;
 
+    private String filename = "invoice.pdf";
+    private String subject = "StockFlow invoice";
+    private String html = """
+                    <p>Hello,</p> <p>Thank you for your order.</p> <p>Your invoice is attached to this email.</p> <p>Regards,<br>StockFlow</p> 
+                    """;
+
 
     public PaymentCompletedListener(
             EmailService emailService,
@@ -37,7 +43,7 @@ public class PaymentCompletedListener {
     public void handle(PaymentCompletedEvent event) {
         receiptPdfService.generateReceipt(event.getOrder())
                 .thenAccept(pdfBytes -> {
-                    emailService.sendInvoice(event.getOrder().getCustomer().getEmail(), pdfBytes);
+                    emailService.sendInvoice(event.getOrder().getCustomer().getEmail(), filename, subject, html, pdfBytes);
                 });
 
     }

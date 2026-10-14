@@ -32,7 +32,6 @@ public class ReceiptPdfService {
             new Color(245,245,245);
 
 
-
     @Async("invoiceExecutor")
     public CompletableFuture<byte[]> generateReceipt(
             CustomerOrder order

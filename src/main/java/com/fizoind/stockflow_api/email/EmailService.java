@@ -46,22 +46,16 @@ public class EmailService {
     }
 
     @Async("invoiceExecutor")
-    public void sendInvoice(String to, byte[] pdfBytes) {
+    public void sendInvoice(String filename, String subject, String html, String to, byte[] pdfBytes) {
 
         try {
 
             String base64Pdf = Base64.getEncoder().encodeToString(pdfBytes);
 
             Attachment attachment = Attachment.builder()
-                    .fileName("invoice.pdf")
+                    .fileName(filename)
                     .content(base64Pdf)
                     .build();
-
-            String subject = "StockFlow invoice";
-
-            String html = """
-                    <p>Hello,</p> <p>Thank you for your order.</p> <p>Your invoice is attached to this email.</p> <p>Regards,<br>StockFlow</p> 
-                    """;
 
             resendEmailService.sendEmail(to, subject, html, attachment);
         } catch (Exception e) {
