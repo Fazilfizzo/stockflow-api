@@ -193,7 +193,7 @@ public class ReceiptPdfService {
 
         addInfoRow(
                 table,
-                "Invoice ID",
+                "Receipt ID",
                 "#" + order.getId()
         );
 

@@ -1,6 +1,7 @@
 package com.fizoind.stockflow_api.order.listener;
 
 import com.fizoind.stockflow_api.email.EmailService;
+import com.fizoind.stockflow_api.invoice.InvoicePdfService;
 import com.fizoind.stockflow_api.order.event.OrderCreatedEvent;
 import com.fizoind.stockflow_api.receipt.ReceiptPdfService;
 import org.springframework.scheduling.annotation.Async;
@@ -12,7 +13,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class OrderEmailInvoiceListener {
 
     private final EmailService emailService;
-    private final ReceiptPdfService receiptPdfService;
+    private final InvoicePdfService invoicePdfService;
 
     private String filename = "invoice.pdf";
     private String subject = "StockFlow invoice";
@@ -20,15 +21,15 @@ public class OrderEmailInvoiceListener {
                     <p>Hello,</p> <p>Thank you for your order.</p> <p>Your invoice is attached to this email.</p> <p>Regards,<br>StockFlow</p> 
                     """;
 
-    public OrderEmailInvoiceListener(EmailService emailService, ReceiptPdfService receiptPdfService) {
+    public OrderEmailInvoiceListener(EmailService emailService, InvoicePdfService invoicePdfService) {
         this.emailService = emailService;
-        this.receiptPdfService = receiptPdfService;
+        this.invoicePdfService = invoicePdfService;
     }
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handle(OrderCreatedEvent event) {
-        receiptPdfService.generateReceipt(event.getCustomerOrder()).thenAccept(pdfBytes -> {
+        invoicePdfService.generateInvoice(event.getCustomerOrder()).thenAccept(pdfBytes -> {
             emailService.sendInvoice(event.getCustomerOrder().getCustomer().getEmail(), filename, subject, html, pdfBytes);
         });
     }
