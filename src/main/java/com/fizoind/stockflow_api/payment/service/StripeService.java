@@ -67,9 +67,9 @@ public class StripeService {
 
                 .putMetadata("paymentId", payment.getId().toString())
 
-                .setSuccessUrl(origin + "payment-success")
+                .setSuccessUrl(origin + "/payment-success")
 
-                .setCancelUrl(origin + "payment-cancel")
+                .setCancelUrl(origin + "/payment-cancel")
 
 
                 .addLineItem(createLineItem(order))
