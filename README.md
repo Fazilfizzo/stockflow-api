@@ -1,475 +1,302 @@
 # StockFlow API
 
-A robust and scalable Inventory Management REST API built with Java and Spring Boot. The project is designed to manage products, categories, suppliers, customers, stock movements, authentication, and role-based access control while following clean backend engineering practices.
+StockFlow API is a Spring Boot-based inventory and order management backend designed for modern retail and stock operations. It provides secure authentication, inventory tracking, customer and supplier management, order workflows, payment/pricing logic, and automated receipt delivery.
 
----
+## Overview
 
-# Features
+The project is built with Java 21 and Spring Boot 3, using MySQL as the primary database. It supports both standard REST endpoints and integrates with Docker for local development.
 
-## Authentication & Authorization
+StockFlow API is designed to manage:
 
-* JWT-based authentication
-* Refresh token support
-* Role-based access control (Admin / User)
-* Secure login and registration system
-* Spring security integration
-* Password encryption using BCrypt
+- Products, categories, customers, and suppliers
+- Inventory stock-in and stock-out operations
+- Order lifecycle management
+- Invoice and receipt generation
+- Email notifications and notifications workflows
+- Secure JWT-based access control
+- Payment and pricing features
+- File uploads and document handling
 
-## Refresh Token Workflow
-The API implements a complete refresh token mechanism:
-* Generate access and refresh tokens during login
-* Persist refresh tokens securely
-* Validate refresh token expiration
-* Revoke invalid or expired refresh tokens
+## Key Features
 
+### Authentication & Authorization
 
-## Inventory Management
+- JWT-based authentication
+- Refresh token support
+- Role-based access control
+- Secure registration and login flow
+- Password hashing with BCrypt
+- Request authentication via Spring Security filters
 
-* Product management
- - Create products
- - Update products
- - Delete products
- - Search products
- - Pagination and sorting
- - Product categorization
-  
-* Category management
-* Supplier management
-* Customer management
-* Stock in / stock out tracking
-* Inventory quantity updates
-* Search, filtering, pagination, and sorting
+### Inventory Management
 
-## API Features
+- Product CRUD operations
+- Category management
+- Supplier management
+- Customer management
+- Stock movement tracking
+- Inventory audit trail
+- Quantity updates and stock history
 
-* RESTful API architecture
-* Request validation
-* Global exception handling
-* Standardized API responses
-* Auditing support
+### Order Management
 
-## Event-Driven Order Processing
-The order creation workflow has been refactored using Spring Events.
-When an order is successfully created:
-* Order is persisted
-* OrderCreatedEvent is published
-* Event listener processes the event
-* Receipt PDF is generated
-* Receipt is emailed to the customer
+- Create, update, and view orders
+- Order item tracking
+- Customer-specific order retrieval
+- Order status handling
+- Audit-friendly transactional flows
+- Event-driven order processing
 
-## PDF Receipt Generation
-Automatically generates professional PDF receipts containing:
-* Order information
-* Customer information
-* Purchased products
-* Quantities
-* Unit prices
-* Total amount
-Generated receipts are attached to customer emails.
+### Billing, Pricing & Payment
 
-## Email Notifications
-SMTP-based email integration.
-Supported features:
-* Receipt delivery
-* PDF attachment support
-* Automated order confirmation emails
-* Event-driven email sending
+- Pricing configuration and logic
+- Payment support via Stripe integration
+- Billing-related modules for invoicing and payment flows
+- Customer-facing financial workflows
 
-## Stock Tracking
-The system automatically tracks inventory changes.
-Supported stock operations:
+### Receipt & Notification System
 
-# Stock In
-Increase inventory when:
-* New inventory arrives
-* Supplier deliveries are received
-  
-# Stock Out
-Decrease inventory when:
-*Customer orders are placed
+- PDF receipt generation with OpenPDF
+- Automatic customer invoice/receipt creation
+- Email sending through SMTP and Resend
+- Notification-driven order completion workflows
+- File upload support for document-related workflows
 
-# Stock Movement History
-Every inventory change is recorded with:
-* Product
-* Quantity
-* Movement type
-* Timestamp
-* User information
-This provides a complete inventory audit trail.
+### Security & Reliability
 
-## Rate Limiting
-The API uses Bucket4j to protect endpoints from abuse.
+- Global exception handling
+- Standardized API responses
+- Validation on incoming requests
+- Rate limiting using Bucket4j
+- Correlation IDs and logging support
+- Auditing fields for created/updated metadata
 
-Subscription Plans:
-# BASIC Plan
-5 requests per minute
+### Infrastructure & DevOps
 
-# PROFESSIONAL Plan
-10 requests per minute
+- Docker support via Dockerfile and Compose
+- MySQL container setup
+- Environment-variable-based configuration
+- Upload directory support for generated files and media
 
-Rate Limit Headers
-Responses include:
-* X-RateLimit-Limit
-* X-RateLimit-Remaining
-* Retry-After
+## Tech Stack
 
-# Benefits
-* Prevent API abuse
-* Fair resource usage
-* Protect backend services
-* Improve system stability
+### Backend
 
-  
+- Java 21
+- Spring Boot 3.3.x
+- Spring Security
+- Spring Data JPA
+- Hibernate
+- Maven
 
-## Auditing
-The project includes basic auditing functionality:
+### Database
 
-* `createdAt`
-* `updatedAt`
-* `createdBy`
-* `updatedBy`
+- MySQL
 
-## Security
+### Additional Libraries
 
-* Spring Security integration
-* JWT token authentication
-* Protected endpoints
-* Role-based endpoint access
+- JWT (jjwt)
+- Bucket4j
+- OpenPDF
+- Stripe Java SDK
+- Resend Java SDK
+- Twilio SDK
+- dotenv-java
+- Lombok
+- Spring Validation
 
----
+### Tools
 
-# Tech Stack
+- Docker
+- Docker Compose
+- Git & GitHub
+- Postman / Insomnia
 
-## Backend
-
-* Java 21
-* Spring Boot
-* Spring Security
-* Spring Data JPA
-* Hibernate
-* Maven
-
-## Database
-
-* MySQL
-
-## Tools & Utilities
-* Postman
-* Git & GitHub
-
----
-
-# Project Structure
+## Project Structure
 
 ```bash
-src
- ┣ main
- ┃ ┣ java
- ┃ ┃ ┗ com.fizoind.stockflow_api
- ┃ ┃    ┣ auditing
- ┃ ┃    ┣ authentication
- ┃ ┃    ┣ category
- ┃ ┃    ┣ common
- ┃ ┃    ┣ configuration
- ┃ ┃    ┣ customer
- ┃ ┃    ┣ exception
- ┃ ┃    ┣ filter
- ┃ ┃    ┣ order
- ┃ ┃    ┣ orderItem
- ┃ ┃    ┣ payment
- ┃ ┃    ┣ product
- ┃ ┃    ┣ stockmovement
- ┃ ┃    ┣ supplier
- ┃ ┃    ┣ user
- ┃ ┃    ┗ StockflowApiApplication
- ┃ ┗ resources
- ┗ test
+src/
+├── main/
+│   └── java/
+│       └── com/
+│           └── fizoind/
+│               └── stockflow_api/
+│                   ├── auditing
+│                   ├── authentication
+│                   ├── cart
+│                   ├── cartItem
+│                   ├── category
+│                   ├── common
+│                   ├── configuration
+│                   ├── customer
+│                   ├── dashboard
+│                   ├── email
+│                   ├── exception
+│                   ├── file
+│                   ├── filter
+│                   ├── interceptor
+│                   ├── invoice
+│                   ├── order
+│                   ├── orderItem
+│                   ├── payment
+│                   ├── pricing
+│                   ├── product
+│                   ├── receipt
+│                   ├── retry
+│                   ├── schedule
+│                   ├── stockmovement
+│                   ├── supplier
+│                   ├── user
+│                   └── StockflowApiApplication.java
+│   └── resources/
+│       └── application.properties
+└── test/
 ```
 
----
+## Core Modules
 
-# Core Modules
+### Authentication Module
 
-## Authentication
+Handles user registration, login, JWT issuance, token refresh, and access control.
 
-Handles:
+### Product & Inventory Module
 
-* User registration
-* Login
-* JWT authentication
-* Role-based authorization
+Manages product records, stock quantity updates, stock movement tracking, and inventory history.
 
-## Product Management
+### Category, Supplier & Customer Modules
 
-Handles:
+Support business entity management needed for modern inventory workflows.
 
-* Product CRUD operations
-* Product stock tracking
-* Product search and filtering
+### Order & Receipt Module
 
-## Category Management
+Controls customer orders, order items, invoice generation, and receipt-related automation.
 
-Handles:
+### Payment & Pricing Module
 
-* Product categorization
-* Category CRUD operations
+Provides pricing logic and payment integrations for financial operations.
 
-## Supplier Management
+### Dashboard & Analytics Module
 
-Handles:
+Supports operational visibility and summary data for business activity.
 
-* Supplier records
-* Supplier-product relationships
+### File & Email Module
 
-## Customer Management
+Handles upload workflows, generated receipts, and email notifications.
 
-Handles:
+## Configuration
 
-* Customer information management
-* Customer order relationships
+The application uses environment variables for sensitive configuration.
 
-## Order & Order Item Management
-
-Handles:
-
-* Customer orders
-* Order items
-* Purchase tracking
-
-## Stock Movement
-
-Handles:
-* Stock in
-* Stock out
-* Inventory movement history
-
-## Common Package
-
-Contains shared utilities and reusable components.
-
-## Configuration Package
-
-Contains Spring Boot configuration classes.
-
-## Filter Package
-
-Contains request/response filtering and logging.
-
-## Exception Package
-
-Contains custom exceptions and global exception handling.
-
-## Auditing Package
-
-Contains auditing configuration and reusable audit fields.
-
----
-
-# API Modules
-
-## Authentication
-
-* Register user
-* Login user
-* JWT token generation
-
-## Products
-
-* Create product
-* Update product
-* Delete product (soft delete)
-* Get all products
-* Search products
-
-## Categories
-
-* Create category
-* Update category
-* Delete category
-* View categories
-
-## Suppliers
-
-* Add supplier
-* Update supplier
-* Delete supplier
-* View suppliers
-
-## Customers
-
-* Add customer
-* Update customer
-* Delete customer
-* View customers
-
-## Stock Management
-
-* Stock In
-* Stock Out
-* Inventory tracking
-* Quantity management
-
-## Order
-
-* create order
-* cancel order
-* get all orders
-* get all orders of certain customer
-* update order status(by admin)
-* get orders by status(either PENDING, CANCELLED, SHIPPED)
-* GET order of certain customer
-
----
-
-
-
-# Validation & Exception Handling
-
-The API uses:
-
-* Bean Validation on supplier dto(`@Valid`)
-* Custom exception handling
-* Global exception responses
-
-This ensures:
-
-* Clean error messages
-* Better API consistency
-* Improved client-side debugging
-
----
-
-# Environment Variables
-
-Sensitive configuration values are managed using environment variables.
-
-Example:
-
-```properties
-spring.datasource.username=${DB_USER}
-spring.datasource.password=${DB_PASSWORD}
-jwt.secret=${JWT_SECRET}
-```
-
----
-
-# Getting Started
-
-## Prerequisites
-
-* Java 21
-* Maven
-* MySQL
-* Git
-
----
-
-# Installation
-
-## 1. Clone the repository
-
-```bash
-git clone https://github.com/your-username/stockflow-api.git
-cd stockflow-api
-```
-
-## 2. Configure database
-
-Create a MySQL database:
-
-```sql
-CREATE DATABASE stockflow_db;
-```
-
----
-
-## 3. Configure environment variables
-
-Set the following variables in your IDE or operating system:
+Example variables:
 
 ```env
-DB_USER=your_database_username
-DB_PASSWORD=your_database_password
-JWT_SECRET=your_secret_key
+PORT=5670
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/stock_flow_db
+JWT_SECRET=your_jwt_secret
+EMAIL_USERNAME=your_email@example.com
+EMAIL_PASSWORD=your_email_password
+RESEND_API_KEY=your_resend_key
+RESEND_FROM=onboarding@resend.dev
+FRONTEND_ORIGIN=http://localhost:3000
+IMAGE=http://localhost:5670
+STRIPE_SECRET_KEY=your_stripe_secret
+STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
 ```
 
----
+## Running the Application
 
-## 4. Run the application
+### Prerequisites
+
+- Java 21
+- Maven
+- MySQL
+- Docker (optional, for containerized setup)
+- Git
+
+### Local Run
 
 ```bash
+git clone https://github.com/Fazilfizzo/stockflow-api.git
+cd stockflow-api
 mvn clean install
 mvn spring-boot:run
 ```
 
-Application will start at:
+The application runs by default on:
 
 ```bash
 http://localhost:5670
 ```
 
----
+### Docker Run
 
-# Example API Endpoints
-
-## Authentication
-
-```http
-POST /auth/register
-POST /auth/login
+```bash
+docker compose up --build
 ```
 
-## Products
+This sets up:
 
-```http
-GET    /products
-GET    /products/{id}
-POST   /products
-PUT    /products/{id}
-DELETE /products/{id}
+- MySQL database service
+- StockFlow API application service
+- Shared upload volume
+
+## Database Setup
+
+Create a MySQL database:
+
+```sql
+CREATE DATABASE stock_flow_db;
 ```
 
-## Categories
+The project is configured to use the database name `stock_flow_db` unless you override it in environment variables.
 
-```http
-GET    /categories
-POST   /categories
-PUT    /categories/{id}
-DELETE /categories/{id}
-```
+## Example API Areas
+
+The project includes endpoints for:
+
+- Authentication
+- Product management
+- Category management
+- Supplier management
+- Customer management
+- Stock movement
+- Order management
+- Billing / payment workflows
+- Receipt generation
+- File uploads
+
+## Notes on Architecture
+
+The system emphasizes a clean layered backend structure with:
+
+- DTOs for data transfer
+- Service-layer business logic
+- JPA repositories for persistence
+- Exception handling for consistent API behavior
+- Logging and audit support
+- Event-driven processing for order workflows and associated notifications
+
+## Future Enhancements
+
+The project continues to evolve with opportunities such as:
+
+- stronger test coverage
+- Swagger/OpenAPI documentation
+- Redis caching
+- improved analytics/dashboard reporting
+- deployment automation
+- frontend integration
+
+## License
+
+This project is intended for educational and portfolio use, and is open for learning purposes.
+
+## Author
+
+Developed as a backend inventory and workflow management application using Java and Spring Boot.
 
 ---
 
-# Testing the API
-
-You can test the API using:
-
-* Postman
-* Insomnia
-* Swagger (if enabled)
-
----
-
-# Future Improvements
-
-* Docker support
-* pagination & sorting
-* Redis caching
-* Email notifications
-* Report generation
-* Unit and integration testing
-* API documentation with Swagger/OpenAPI
-* React frontend integration
-* Cloud deployment
-
----
-
-# Author
-
-Developed as a backend inventory management system project using Spring Boot and modern backend development practices.
-
----
-
-# License
-
-This project is open-source and available for learning and portfolio purposes.
+For the latest project status and implementation changes, see the repository commit history and source structure in this project.
