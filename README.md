@@ -1,90 +1,75 @@
 # StockFlow API
 
-StockFlow API is a Spring Boot-based inventory and order management backend designed for modern retail and stock operations. It provides secure authentication, inventory tracking, customer and supplier management, order workflows, payment/pricing logic, and automated receipt delivery.
+StockFlow API is a Spring Boot-based inventory and order management backend designed for retail, warehouse, and stock operations. It provides secure authentication, product and inventory tracking, supplier and customer management, order processing, pricing/payment support, invoicing and receipts, and file/email-driven workflows.
 
-## Overview
+## Why this project
 
-The project is built with Java 21 and Spring Boot 3, using MySQL as the primary database. It supports both standard REST endpoints and integrates with Docker for local development.
+This project is built to handle real-world inventory and order operations in a clean backend architecture. It combines secure access control, audit-friendly persistence, stock movement tracking, and operational automation in one API layer.
 
-StockFlow API is designed to manage:
+## Core capabilities
 
-- Products, categories, customers, and suppliers
-- Inventory stock-in and stock-out operations
-- Order lifecycle management
-- Invoice and receipt generation
-- Email notifications and notifications workflows
-- Secure JWT-based access control
-- Payment and pricing features
-- File uploads and document handling
+- Product, category, supplier, and customer management
+- Inventory stock-in and stock-out tracking
+- Order creation and lifecycle management
+- Pricing and payment-ready architecture
+- PDF receipt generation
+- Email notifications and automated communication flows
+- JWT-based authentication and refresh-token support
+- Global validation and exception handling
+- Dockerized local development setup
 
-## Key Features
+## Features
 
-### Authentication & Authorization
+### Authentication & security
 
 - JWT-based authentication
 - Refresh token support
 - Role-based access control
-- Secure registration and login flow
 - Password hashing with BCrypt
-- Request authentication via Spring Security filters
+- Spring Security integration
+- Request validation and exception handling
+- Rate limiting with Bucket4j
+- Audit metadata for created/updated actions
 
-### Inventory Management
+### Inventory management
 
 - Product CRUD operations
+- Product search, filtering, sorting, and pagination
 - Category management
 - Supplier management
 - Customer management
-- Stock movement tracking
-- Inventory audit trail
-- Quantity updates and stock history
+- Stock movement tracking with movement history
+- Inventory quantity updates and audit trail
 
-### Order Management
+### Order management
 
-- Create, update, and view orders
-- Order item tracking
-- Customer-specific order retrieval
-- Order status handling
-- Audit-friendly transactional flows
-- Event-driven order processing
+- Create and manage customer orders
+- Track order items
+- View orders by customer or status
+- Handle order status transitions
+- Event-driven order processing for downstream workflows
 
-### Billing, Pricing & Payment
+### Billing & payment
 
-- Pricing configuration and logic
-- Payment support via Stripe integration
-- Billing-related modules for invoicing and payment flows
-- Customer-facing financial workflows
+- Pricing module support
+- Payment flow integration via Stripe SDK
+- Billing-related backend support for invoice and payment workflows
 
-### Receipt & Notification System
+### Receipt & communication
 
 - PDF receipt generation with OpenPDF
-- Automatic customer invoice/receipt creation
-- Email sending through SMTP and Resend
-- Notification-driven order completion workflows
-- File upload support for document-related workflows
+- Automated order confirmation and receipt delivery
+- Email sending with SMTP/Resend integration
+- File upload support for generated documents and media
 
-### Security & Reliability
-
-- Global exception handling
-- Standardized API responses
-- Validation on incoming requests
-- Rate limiting using Bucket4j
-- Correlation IDs and logging support
-- Auditing fields for created/updated metadata
-
-### Infrastructure & DevOps
-
-- Docker support via Dockerfile and Compose
-- MySQL container setup
-- Environment-variable-based configuration
-- Upload directory support for generated files and media
-
-## Tech Stack
+## Tech stack
 
 ### Backend
 
 - Java 21
-- Spring Boot 3.3.x
+- Spring Boot 3
 - Spring Security
+- Spring Web
 - Spring Data JPA
 - Hibernate
 - Maven
@@ -93,7 +78,7 @@ StockFlow API is designed to manage:
 
 - MySQL
 
-### Additional Libraries
+### Additional libraries
 
 - JWT (jjwt)
 - Bucket4j
@@ -112,82 +97,77 @@ StockFlow API is designed to manage:
 - Git & GitHub
 - Postman / Insomnia
 
-## Project Structure
+## Project structure
 
 ```bash
 src/
 ├── main/
-│   └── java/
-│       └── com/
-│           └── fizoind/
-│               └── stockflow_api/
-│                   ├── auditing
-│                   ├── authentication
-│                   ├── cart
-│                   ├── cartItem
-│                   ├── category
-│                   ├── common
-│                   ├── configuration
-│                   ├── customer
-│                   ├── dashboard
-│                   ├── email
-│                   ├── exception
-│                   ├── file
-│                   ├── filter
-│                   ├── interceptor
-│                   ├── invoice
-│                   ├── order
-│                   ├── orderItem
-│                   ├── payment
-│                   ├── pricing
-│                   ├── product
-│                   ├── receipt
-│                   ├── retry
-│                   ├── schedule
-│                   ├── stockmovement
-│                   ├── supplier
-│                   ├── user
-│                   └── StockflowApiApplication.java
+│   ├── java/
+│   │   └── com/
+│   │       └── fizoind/
+│   │           └── stockflow_api/
+│   │               ├── auditing
+│   │               ├── authentication
+│   │               ├── cart
+│   │               ├── cartItem
+│   │               ├── category
+│   │               ├── common
+│   │               ├── configuration
+│   │               ├── customer
+│   │               ├── dashboard
+│   │               ├── email
+│   │               ├── exception
+│   │               ├── file
+│   │               ├── filter
+│   │               ├── interceptor
+│   │               ├── invoice
+│   │               ├── order
+│   │               ├── orderItem
+│   │               ├── payment
+│   │               ├── pricing
+│   │               ├── product
+│   │               ├── receipt
+│   │               ├── retry
+│   │               ├── schedule
+│   │               ├── stockmovement
+│   │               ├── supplier
+│   │               ├── user
+│   │               └── StockflowApiApplication.java
 │   └── resources/
 │       └── application.properties
-└── test/
+├── test/
+├── Dockerfile
+├── compose.yaml
+├── pom.xml
+├── README.md
+└── uploads/
 ```
 
-## Core Modules
+## Main modules
 
-### Authentication Module
+### Authentication module
+Handles user registration, login, JWT issuance, refresh-token logic, and role-based access control.
 
-Handles user registration, login, JWT issuance, token refresh, and access control.
+### Product & inventory module
+Manages product records, stock movement, inventory history, and quantity updates.
 
-### Product & Inventory Module
+### Order module
+Controls order creation, status management, customer order lookup, and downstream processing.
 
-Manages product records, stock quantity updates, stock movement tracking, and inventory history.
+### Receipt & email module
+Generates PDF documents and sends automated notifications after order-related events.
 
-### Category, Supplier & Customer Modules
+### Payment & pricing module
+Supports pricing logic and payment-related integrations for business transactions.
 
-Support business entity management needed for modern inventory workflows.
-
-### Order & Receipt Module
-
-Controls customer orders, order items, invoice generation, and receipt-related automation.
-
-### Payment & Pricing Module
-
-Provides pricing logic and payment integrations for financial operations.
-
-### Dashboard & Analytics Module
-
-Supports operational visibility and summary data for business activity.
-
-### File & Email Module
-
-Handles upload workflows, generated receipts, and email notifications.
+### Dashboard & reporting module
+Provides operational visibility and summary data for business workflows.
 
 ## Configuration
 
-The application uses environment variables for sensitive configuration.
+The application is configured through environment variables for database, JWT, email, and payment settings.
 
-Example variables:
+Example:
 
 ```env
 PORT=5670
@@ -205,17 +185,17 @@ STRIPE_SECRET_KEY=your_stripe_secret
 STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
 ```
 
-## Running the Application
+## Getting started
 
 ### Prerequisites
 
 - Java 21
 - Maven
 - MySQL
-- Docker (optional, for containerized setup)
+- Docker (optional, for container based setup)
 - Git
 
-### Local Run
+### Run locally
 
 ```bash
 git clone https://github.com/Fazilfizzo/stockflow-api.git
@@ -224,79 +204,72 @@ mvn clean install
 mvn spring-boot:run
 ```
 
-The application runs by default on:
+The app runs on:
 
 ```bash
 http://localhost:5670
 ```
 
-### Docker Run
+### Run with Docker
 
 ```bash
 docker compose up --build
 ```
 
-This sets up:
+This starts:
 
-- MySQL database service
-- StockFlow API application service
-- Shared upload volume
+- MySQL database
+- StockFlow API application
+- Upload volume for files and generated documents
 
-## Database Setup
+## Database setup
 
-Create a MySQL database:
+Create the database:
 
 ```sql
 CREATE DATABASE stock_flow_db;
 ```
 
-The project is configured to use the database name `stock_flow_db` unless you override it in environment variables.
-
-## Example API Areas
+## Example API areas
 
 The project includes endpoints for:
 
-- Authentication
-- Product management
-- Category management
-- Supplier management
-- Customer management
-- Stock movement
-- Order management
-- Billing / payment workflows
-- Receipt generation
-- File uploads
+- authentication
+- product management
+- category management
+- supplier management
+- customer management
+- stock movement
+- order management
+- payment and pricing operations
+- receipt generation
+- file upload and email workflows
 
-## Notes on Architecture
+## Development notes
 
-The system emphasizes a clean layered backend structure with:
+The architecture follows a modular backend pattern with DTOs, service-layer logic, JPA repositories, centralized exception handling, validation, and event-driven processing.
 
-- DTOs for data transfer
-- Service-layer business logic
-- JPA repositories for persistence
-- Exception handling for consistent API behavior
-- Logging and audit support
-- Event-driven processing for order workflows and associated notifications
+This helps keep the API scalable, maintainable, and suitable for real-world operational workflows.
 
-## Future Enhancements
+## Future improvements
 
-The project continues to evolve with opportunities such as:
+Planned and possible enhancements include:
 
-- stronger test coverage
+- expanded automated tests
 - Swagger/OpenAPI documentation
 - Redis caching
-- improved analytics/dashboard reporting
+- improved analytics dashboards
 - deployment automation
 - frontend integration
 
 ## License
 
-This project is intended for educational and portfolio use, and is open for learning purposes.
+This project is intended for educational and portfolio use.
 
 ## Author
 
-Developed as a backend inventory and workflow management application using Java and Spring Boot.
+Developed as a backend inventory and operations management application using Java and Spring Boot.
 
 ---
 
-For the latest project status and implementation changes, see the repository commit history and source structure in this project.
+For the latest implementation details, check the repository commit history and source code in this project.
