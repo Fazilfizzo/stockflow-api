@@ -15,9 +15,9 @@ public class OrderEmailInvoiceListener {
     private final EmailService emailService;
     private final InvoicePdfService invoicePdfService;
 
-    private String filename = "invoice.pdf";
-    private String subject = "StockFlow invoice";
-    private String html = """
+    private final String filename = "invoice.pdf";
+    private final String subject = "StockFlow invoice";
+    private final String html = """
                     <p>Hello,</p> <p>Thank you for your order.</p> <p>Your invoice is attached to this email.</p> <p>Regards,<br>StockFlow</p> 
                     """;
 
@@ -30,7 +30,7 @@ public class OrderEmailInvoiceListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handle(OrderCreatedEvent event) {
         invoicePdfService.generateInvoice(event.getCustomerOrder()).thenAccept(pdfBytes -> {
-            emailService.sendInvoice(event.getCustomerOrder().getCustomer().getEmail(), filename, subject, html, pdfBytes);
+            emailService.sendEmail(event.getCustomerOrder().getCustomer().getEmail(), filename, subject, html, pdfBytes);
         });
     }
 }

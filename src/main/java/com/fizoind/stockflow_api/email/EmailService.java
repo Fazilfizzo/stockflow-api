@@ -23,10 +23,12 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final ResendEmailService resendEmailService;
+    private final SendLibertyEmailService sendLibertyEmailService;
 
-    public EmailService(JavaMailSender mailSender, ResendEmailService resendEmailService) {
+    public EmailService(JavaMailSender mailSender, ResendEmailService resendEmailService, SendLibertyEmailService sendLibertyEmailService) {
         this.mailSender = mailSender;
         this.resendEmailService = resendEmailService;
+        this.sendLibertyEmailService = sendLibertyEmailService;
     }
 
     @Async("emailExecutor")
@@ -45,19 +47,32 @@ public class EmailService {
         mailSender.send(mailMessage);
     }
 
-    @Async("invoiceExecutor")
-    public void sendInvoice(String filename, String subject, String html, String to, byte[] pdfBytes) {
+//    @Async("invoiceExecutor")
+//    public void sendEmail(String filename, String subject, String html, String to, byte[] pdfBytes) {
+//
+//        try {
+//
+//            String base64Pdf = Base64.getEncoder().encodeToString(pdfBytes);
+//
+//            Attachment attachment = Attachment.builder()
+//                    .fileName(filename)
+//                    .content(base64Pdf)
+//                    .build();
+//
+//            resendEmailService.sendEmail(to, subject, html, attachment);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
+
+    @Async("emailExecutor")
+    public void sendEmail(String filename, String subject, String html, String to, byte[] pdfBytes) {
 
         try {
 
             String base64Pdf = Base64.getEncoder().encodeToString(pdfBytes);
 
-            Attachment attachment = Attachment.builder()
-                    .fileName(filename)
-                    .content(base64Pdf)
-                    .build();
-
-            resendEmailService.sendEmail(to, subject, html, attachment);
+            sendLibertyEmailService.sendEmail(filename, to, subject, html, base64Pdf);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
