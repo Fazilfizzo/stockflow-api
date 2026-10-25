@@ -66,7 +66,7 @@ public class EmailService {
 //    }
 
     @Async("emailExecutor")
-    public void sendEmail(String filename, String subject, String html, String to, byte[] pdfBytes) {
+    public void sendEmail(String filename, String to, String subject, String html, byte[] pdfBytes) {
 
         try {
 
