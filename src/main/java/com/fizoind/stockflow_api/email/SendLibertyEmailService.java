@@ -43,6 +43,7 @@ public class SendLibertyEmailService {
                     .uri(URI.create("https://sendliberty.com/api/send"))
                     .header("Authorization", sendLibertyKey)
                     .header("Content-Type", "application/json")
+                    .header("Origin", "https://react-stockflow.vercel.app")
                     .POST(HttpRequest.BodyPublishers.ofString(payload))
                     .build();
 
