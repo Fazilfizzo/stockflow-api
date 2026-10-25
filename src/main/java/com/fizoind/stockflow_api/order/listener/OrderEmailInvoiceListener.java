@@ -30,7 +30,7 @@ public class OrderEmailInvoiceListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handle(OrderCreatedEvent event) {
         invoicePdfService.generateInvoice(event.getCustomerOrder()).thenAccept(pdfBytes -> {
-            emailService.sendEmail(event.getCustomerOrder().getCustomer().getEmail(), filename, subject, html, pdfBytes);
+            emailService.sendEmail(filename, event.getCustomerOrder().getCustomer().getEmail(), subject, html, pdfBytes);
         });
     }
 }

@@ -43,7 +43,7 @@ public class PaymentCompletedListener {
     public void handle(PaymentCompletedEvent event) {
         receiptPdfService.generateReceipt(event.getOrder())
                 .thenAccept(pdfBytes -> {
-                    emailService.sendEmail(event.getOrder().getCustomer().getEmail(), filename, subject, html, pdfBytes);
+                    emailService.sendEmail(filename, event.getOrder().getCustomer().getEmail(), subject, html, pdfBytes);
                 });
 
     }
